@@ -1,8 +1,8 @@
 class Car:
     def __init__(self):
-        pass
+        self.engine = Engine()
 
-    class Engine:
+class Engine:
         def __init__(self):
             pass
 
@@ -10,4 +10,4 @@ class Car:
             return "Engine start"
 
 car = Car()
-print(car.Engine().start())
+print(car.engine.start())
