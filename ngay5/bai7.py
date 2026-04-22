@@ -7,7 +7,7 @@ class CountDown:
 
     def __next__(self):
         if self.current <= 0:
-            raise StopIteration   # 🔥 kết thúc tại đây
+            raise StopIteration
         val = self.current
         self.current -= 1
         return val
