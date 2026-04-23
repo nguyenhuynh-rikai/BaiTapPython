@@ -3,4 +3,4 @@ import pandas as pd
 df = pd.read_csv('data.csv')
 
 
-print(df.isna().values.any())
+print(df.isna().sum())
