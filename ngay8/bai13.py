@@ -1,19 +1,13 @@
 import geopandas as gpd
-from shapely.geometry import Polygon
-import matplotlib.pyplot as plt
 
-poly1 = Polygon([(0,0),(2,0),(2,2),(0,2)])
+gdf = gpd.read_file("data/gadm41_VNM_3.shp")
+gdf = gdf.to_crs("EPSG:4326")
 
-poly2 = Polygon([(1,1),(3,1),(3,3),(1,3)])
+g1 = gdf.iloc[:50]
+g2 = gdf.iloc[50:100]
 
-gdf1 = gpd.GeoDataFrame(geometry=[poly1], crs="EPSG:4326")
-gdf2 = gpd.GeoDataFrame(geometry=[poly2], crs="EPSG:4326")
+inter = gpd.overlay(g1, g2, how="intersection")
+union = gpd.overlay(g1, g2, how="union")
 
-# inter = gpd.overlay(gdf1, gdf2, how="intersection")
-union = gpd.overlay(gdf1, gdf2, how="union")
-
-
-union.plot(color="lightblue", edgecolor="black")
-plt.show()
-# inter.plot(edgecolor="black", color="red")
-# plt.show()
+print(inter)
+print(union)
