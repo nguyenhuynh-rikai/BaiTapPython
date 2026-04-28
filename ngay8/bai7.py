@@ -1,42 +1,33 @@
-from shapely.geometry import Point, Polygon
 import geopandas as gpd
+import pandas as pd
+from shapely.geometry import Point
 import matplotlib.pyplot as plt
 
-poly1 = Polygon([
-    (108.15, 16.00),
-    (108.20, 16.00),
-    (108.20, 16.05),
-    (108.15, 16.05)
-])
+gdf_admin = gpd.read_file("data/gadm41_VNM_3.shp")
 
-poly2 = Polygon([
-    (108.20, 16.00),
-    (108.25, 16.00),
-    (108.25, 16.05),
-    (108.20, 16.05)
-])
+data = pd.DataFrame({
+    "name": ["A", "B", "C"],
+    "lon": [108.2, 108.3, 108.25],
+    "lat": [16.05, 16.1, 16.08]
+})
 
-gdf_poly = gpd.GeoDataFrame(
-    {"area": ["A", "B"], "geometry": [poly1, poly2]},
+gdf_points = gpd.GeoDataFrame(
+    data,
+    geometry=[Point(xy) for xy in zip(data.lon, data.lat)],
     crs="EPSG:4326"
 )
 
+gdf_admin = gdf_admin.to_crs("EPSG:4326")
 
-points = [
-    Point(108.17, 16.02),
-    Point(108.22, 16.02),
-    Point(108.30, 16.10)
-]
-
-gdf_point = gpd.GeoDataFrame(
-    {"user": ["U1", "U2", "U3"], "geometry": points},
-    crs="EPSG:4326"
+result = gpd.sjoin(
+    gdf_points,
+    gdf_admin,
+    how="left",
+    predicate="within"
 )
 
+print(result[["name", "geometry"]])
 
-ax = gdf_poly.plot(edgecolor="black")
-gdf_point.plot(ax=ax, color="red")
-
-result = gpd.sjoin(gdf_point, gdf_poly, how="left", predicate="within")
+ax = gdf_admin.plot(figsize=(10, 10), edgecolor="black")
+gdf_points.plot(ax=ax, color="red")
 plt.show()
-print(result)
