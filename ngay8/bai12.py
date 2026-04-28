@@ -1,17 +1,11 @@
 import geopandas as gpd
-from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
+import numpy as np
 
-poly1 = Polygon([(0,0),(1,0),(1,1),(0,1)])
-poly2 = Polygon([(1,0),(2,0),(2,1),(1,1)])
-poly3 = Polygon([(0,1),(1,1),(1,2),(0,2)])
+gdf = gpd.read_file("data/gadm41_VNM_3.shp")
 
-data = gpd.GeoDataFrame({
-    "region": ["A", "B", "C"],
-    "value": [10, 50, 100],
-    "geometry": [poly1, poly2, poly3]
-})
+gdf["value"] = np.random.randint(1, 100, len(gdf))
 
-data.plot(column="value", cmap="OrRd", legend=True,edgecolor="black")
+gdf.plot(column="value", cmap="OrRd", legend=True)
 
 plt.show()
