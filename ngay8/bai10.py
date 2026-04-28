@@ -1,18 +1,13 @@
-import math
+import geopandas as gpd
+from shapely.geometry import Point
 
-def haversine(lat1, lon1, lat2, lon2):
-    R = 6371000
+gdf = gpd.read_file("data/gadm41_VNM_3.shp")
+gdf = gdf.to_crs("EPSG:3857")
 
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
+p1 = Point(108.2022, 16.0544)
+p2 = Point(105.8342, 21.0278)
 
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
+p1 = gpd.GeoSeries([p1], crs="EPSG:4326").to_crs("EPSG:3857")[0]
+p2 = gpd.GeoSeries([p2], crs="EPSG:4326").to_crs("EPSG:3857")[0]
 
-    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    return R * c
-
-dist = haversine(16.05, 108.20, 16.06, 108.21)
-print(dist)
+print(p1.distance(p2))
