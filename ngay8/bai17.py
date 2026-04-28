@@ -1,10 +1,10 @@
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
-gdf = gpd.read_file("data/my_map.shp")
+gdf = gpd.read_file("data/gadm41_VNM_3.shp")
 
-gdf["geometry_simplified"] = gdf.geometry.simplify(0.1)
+gdf["simple"] = gdf.geometry.simplify(0.01)
 
-gdf.set_geometry("geometry_simplified").plot()
+gdf.set_geometry("simple").plot()
 
 plt.show()
