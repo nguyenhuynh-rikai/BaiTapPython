@@ -14,7 +14,12 @@ df = df.with_columns(
 )
 
 df = df.with_columns(
-    pl.col("time_utc").dt.replace_time_zone("UTC")
+    pl.col("time_utc").dt.convert_time_zone("Asia/Ho_Chi_Minh")
 )
+
+df = df.with_columns([
+    pl.col("time_utc").dt.hour().alias("hour"),
+    pl.col("time_utc").dt.weekday().alias("weekday")
+])
 
 print(df)
