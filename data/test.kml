@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+
+    <name>Demo KML</name>
+
+    <Placemark>
+      <name>Da Nang Point</name>
+      <Point>
+        <coordinates>108.2022,16.0544,0</coordinates>
+      </Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Hanoi Point</name>
+      <Point>
+        <coordinates>105.8342,21.0278,0</coordinates>
+      </Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Ho Chi Minh Polygon</name>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              106.6,10.7,0
+              106.8,10.7,0
+              106.8,10.9,0
+              106.6,10.9,0
+              106.6,10.7,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+
+  </Document>
+</kml>
