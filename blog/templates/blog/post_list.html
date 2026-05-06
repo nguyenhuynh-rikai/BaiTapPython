@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Blog</title>
+</head>
+<body>
+    <h1>Danh sách bài viết</h1>
+    <ul>
+        {% for post in posts %}
+            <li>
+                <strong>{{ post.title }}</strong> -
+                <small>{{ post.created_at|date:"d/m/Y" }}</small>
+            </li>
+        {% empty %}
+            <li>Chưa có bài viết nào.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
