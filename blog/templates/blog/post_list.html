@@ -20,8 +20,13 @@
             <li>Chưa có bài viết nào.</li>
         {% endfor %}
         <img onclick='displayDate()' src="{% static 'blog/images/gauge.jpg' %}">
-        <button onclick="displayDate()">The time is?</button>
-        <p id="demo"></p>
     </ul>
+    <a href="/create_post/" >
+        <button>Create button</button>
+    </a>
 </body>
+<footer>
+    <p>&copy; {{ current_year }} {{ site_name }}</p>
+    <p>Liên hệ: {{ contact_email }}</p>
+</footer>
 </html>
