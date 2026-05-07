@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    'tutorial.api'
+    'tutorial.api',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -119,6 +120,9 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": [
+        "rest_framework.pagination.PageNumberPagination",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
     "PAGE_SIZE": 10,
 }
