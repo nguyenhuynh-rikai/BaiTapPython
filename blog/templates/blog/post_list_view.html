@@ -9,7 +9,7 @@
 <body>
     {% for post in posts %}
         <p>
-            <a href="{% url 'post_detail' post.pk %}">
+            <a href="{% url 'post_detail' %}">
                 {{ post.title }}
             </a>
             - {{ post.content }}
