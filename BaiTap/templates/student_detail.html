@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chi tiết: {{ student.name }}</title>
+</head>
+<body>
+    <h1>Thông tin sinh viên</h1>
+    <p><strong>Họ tên:</strong> {{ student.name }}</p>
+    <p><strong>Tuổi:</strong> {{ student.age }}</p>
+    <p><strong>Đường dẫn:</strong> {{ student.slug }}</p>
+    <hr>
+    <h3>Thông tin thẻ sinh viên:</h3>
+    <!-- Nếu có thẻ, in ra ngày cấp. Nếu không có thẻ (người cũ), nó sẽ không in gì -->
+    <p><strong>Mã số thẻ:</strong> {{ student.studentcard.card_number }}</p>
+    <p><strong>Ngày cấp thẻ:</strong> {{ student.studentcard.issue_date }}</p>
+    <hr>
+    <br>
+    <a href="{% url 'student_list' %}"> quay lại danh sách</a>
+</body>
+</html>
