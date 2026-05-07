@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Blog</title>
+    <link rel="stylesheet" href="{% static 'blog/style.css' %}">
+    <script src="{% static 'blog/js/script.js' %}"></script>
+</head>
+<body>
+    <h1>Danh sách bài viết</h1>
+    <ul>
+        {% for post in posts %}
+            {% if post.is_published %}
+                <li>
+                    <strong>{{ post.title }}</strong> -
+                    <small>{{ post.created_at|date:"d/m/Y" }}</small>
+                </li>
+            {% endif %}
+        {% empty %}
+            <li>Chưa có bài viết nào.</li>
+        {% endfor %}
+        <img onclick='displayDate()' src="{% static 'blog/images/gauge.jpg' %}">
+    </ul>
+    <a href="/create_post/" >
+        <button>Create button</button>
+    </a>
+</body>
+<footer>
+    <p>&copy; {{ current_year }} {{ site_name }}</p>
+    <p>Liên hệ: {{ contact_email }}</p>
+</footer>
+</html>

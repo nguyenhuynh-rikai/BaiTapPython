@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{% static 'blog/js/script.js' %}"></script>
+</head>
+<body>
+    {% for post in posts %}
+        <p>
+            <a href="{% url 'post_detail' %}">
+                {{ post.title }}
+            </a>
+            - {{ post.content }}
+        </p>
+    {% endfor %}
+</body>
+<footer>
+    <p>&copy; {{ current_year }} {{ site_name }}</p>
+    <p>Liên hệ: {{ contact_email }}</p>
+</footer>
+</html>
