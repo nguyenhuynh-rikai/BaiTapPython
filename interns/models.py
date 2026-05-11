@@ -1,5 +1,9 @@
 from django.db import models
 
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200)
+
 class Interns(models.Model):
     STATUS_CHOICES = [
         ('apply', 'Dang ung tuyen'),
@@ -11,6 +15,7 @@ class Interns(models.Model):
     specialization = models.CharField(max_length=50)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+    company = models.ForeignKey(Company, related_name='interns', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.name} - {self.specialization}"
