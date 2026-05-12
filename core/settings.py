@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'interns',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -121,18 +122,26 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 REST_FRAMEWORK = {
-
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',  # Dùng cho App/React
         'rest_framework.authentication.SessionAuthentication', # Dùng cho Web Admin/Browser
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', # Mặc định: Phải đăng nhập mới được xem/sửa
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5
+    'PAGE_SIZE': 5,
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',  # Người dùng chưa đăng nhập: 5 lần/phút
+        'user': '10/minute'  # Người dùng đã đăng nhập: 10 lần/phút
+    },
 }
 
 from datetime import timedelta
@@ -144,3 +153,14 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',), # Định nghĩa tiền tố trong Header là Bearer
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Intern Management API',
+    'DESCRIPTION': 'Hệ thống quản lý thực tập sinh - Day 13 Project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
