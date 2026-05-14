@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="96b20b29-dda8-407f-b059-64516e11224e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/asgi.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/settings.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/wsgi.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/admin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/apps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/context_processors.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/forms.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0002_student_slug.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0003_studentcard.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/signals.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/tests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/core/views.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/manage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/static/css/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/static/img/tn0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/static/js/main.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/templates/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/BaiTap/templates/student_detail.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotChats">
+    <option name="panelChat">
+      <chat>
+        <option name="activeSessionId" value="abc86816-404b-4af4-85a3-88e55da731d1" />
+        <option name="sessions">
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="d0b7f686-1d09-4ef4-87b0-61079061fba2" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="status" value="Stopped" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="785e888e-29b4-4ab0-bb31-85998be961fb" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="abc86816-404b-4af4-85a3-88e55da731d1" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gpt-5.2-codex" />
+            <option name="status" value="Stopped" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="c8e35c95-15fd-4169-aa09-df77ac78cdf9" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gpt-5.2-codex" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+        </option>
+        <option name="type" value="PANEL" />
+      </chat>
+    </option>
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Nguyen/BaiTapPython" value="3DNZeOUxdZAddOka9TGiI1gQplM" />
+    </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedModel">
+    <selectedModels>
+      <entry key="agent-panel" value="GPT-5.2-Codex" />
+      <entry key="chat-panel" value="GPT-5.2-Codex" />
+    </selectedModels>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="3DNZeOUxdZAddOka9TGiI1gQplM" />
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gpt-5.2-codex" />
+          </model>
+        </option>
+        <option name="targetType" value="LOCAL" />
+      </template>
+    </option>
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "nguyen__day14",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Nguyen/BaiTapPython",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "actions.on.save",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-b63d5a1f7c97-b61e75351b1f-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.22158.340" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="96b20b29-dda8-407f-b059-64516e11224e" name="Changes" comment="" />
+      <created>1778124590186</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1778124590186</updated>
+      <workItem from="1778124592847" duration="8271000" />
+      <workItem from="1778149475408" duration="49000" />
+      <workItem from="1778204963149" duration="6000" />
+      <workItem from="1778205017721" duration="28000" />
+      <workItem from="1778463638616" duration="1078000" />
+      <workItem from="1778465277514" duration="13467000" />
+      <workItem from="1778550024059" duration="5749000" />
+      <workItem from="1778579467334" duration="9000" />
+      <workItem from="1778744597478" duration="14000" />
+      <workItem from="1778749410718" duration="1366000" />
+      <workItem from="1778750813595" duration="16000" />
+      <workItem from="1778750841667" duration="883000" />
+      <workItem from="1778751737452" duration="2119000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
