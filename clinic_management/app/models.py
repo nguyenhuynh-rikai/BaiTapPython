@@ -1,5 +1,6 @@
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -308,6 +309,9 @@ class Drug(TimeStampedModel):
         indexes = [
             models.Index(fields=["name"]),
             models.Index(fields=["category", "is_active"]),
+            GinIndex(
+                fields=["name"]
+            )
         ]
 
     def __str__(self):

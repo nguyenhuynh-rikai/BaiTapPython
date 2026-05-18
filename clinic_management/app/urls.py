@@ -92,26 +92,26 @@ router.register(r"drugs",        DrugViewSet,        basename="drug")
 urlpatterns = [
 
     # ── Auth ────────────────────────────────────────────────
-    path("auth/register/",        RegisterView.as_view(),       name="auth-register"),
-    path("auth/login/",           LoginView.as_view(),          name="auth-login"),
-    path("auth/token/refresh/",   TokenRefreshView.as_view(),   name="auth-token-refresh"),
-    path("auth/me/",              MeView.as_view(),             name="auth-me"),
-    path("auth/change-password/", ChangePasswordView.as_view(), name="auth-change-password"),
+    path("api/auth/register/",        RegisterView.as_view(),       name="auth-register"),
+    path("api/auth/login/",           LoginView.as_view(),          name="auth-login"),
+    path("api/auth/token/refresh/",   TokenRefreshView.as_view(),   name="auth-token-refresh"),
+    path("api/auth/me/",              MeView.as_view(),             name="auth-me"),
+    path("api/auth/change-password/", ChangePasswordView.as_view(), name="auth-change-password"),
 
     # ── Patient ──────────────────────────────────────────────
-    path("patients/me/",               PatientMeView.as_view(),          name="patient-me"),
-    path("patients/me/appointments/",  PatientAppointmentsView.as_view(), name="patient-appointments"),
+    path("api/patients/me/",               PatientMeView.as_view(),          name="patient-me"),
+    path("api/patients/me/appointments/",  PatientAppointmentsView.as_view(), name="patient-appointments"),
 
     # ── Slots ────────────────────────────────────────────────
-    path("slots/available/", AvailableSlotsView.as_view(), name="slots-available"),
+    path("api/slots/available/", AvailableSlotsView.as_view(), name="slots-available"),
 
     # ── Payment (không qua router vì không có list) ──────────
-    path("payments/<uuid:pk>/", PaymentDetailView.as_view(), name="payment-detail"),
+    path("api/payments/<uuid:pk>/", PaymentDetailView.as_view(), name="payment-detail"),
 
     # ── API Docs ─────────────────────────────────────────────
-    path("schema/", SpectacularAPIView.as_view(),                          name="schema"),
-    path("docs/",   SpectacularSwaggerView.as_view(url_name="schema"),     name="swagger-ui"),
-    path("redoc/",  SpectacularRedocView.as_view(url_name="schema"),       name="redoc"),
+    path("api/schema/", SpectacularAPIView.as_view(),                          name="schema"),
+    path("api/docs/",   SpectacularSwaggerView.as_view(url_name="schema"),     name="swagger-ui"),
+    path("api/redoc/",  SpectacularRedocView.as_view(url_name="schema"),       name="redoc"),
 
     # ── Router (clinics, doctors, appointments, drugs) ───────
     path("api/", include(router.urls)),

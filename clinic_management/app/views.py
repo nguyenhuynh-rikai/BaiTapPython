@@ -32,6 +32,7 @@ Endpoints được đăng ký (xem urls.py):
 import logging
 from datetime import date
 
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.utils import timezone
 from rest_framework import filters, generics, mixins, status
 from rest_framework.decorators import action
@@ -42,6 +43,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from .models import Appointment
 from .permissions import (
     IsAdmin, IsAppointmentParticipant, IsDoctorOrAdmin,
     IsOwnerOrAdmin, IsPatient, ReadOnlyOrAdmin,
@@ -368,6 +370,7 @@ class AppointmentViewSet(
     GET    /appointments/{id}/medical-record/ — xem hồ sơ
     POST   /appointments/{id}/medical-record/ — tạo hồ sơ (doctor)
     """
+    queryset = Appointment.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class   = StandardPagination
 
@@ -517,26 +520,38 @@ class AppointmentViewSet(
 # ─────────────────────────────────────────────────────────────
 # DRUG VIEWSET
 # ─────────────────────────────────────────────────────────────
-
 class DrugViewSet(ReadOnlyModelViewSet):
-    """
-    GET /drugs/        — tìm kiếm danh mục thuốc
-    GET /drugs/{id}/   — chi tiết thuốc
-    Full-text search qua ?search= (tên, hoạt chất, mô tả).
-    """
+
     serializer_class   = DrugSerializer
     permission_classes = [IsAuthenticated]
     pagination_class   = StandardPagination
-    filter_backends    = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields      = ["name", "generic_name", "description", "category"]
-    ordering_fields    = ["name", "category"]
-    ordering           = ["name"]
 
     def get_queryset(self):
+
         from .models import Drug
-        return Drug.objects.filter(is_active=True)
 
+        qs = Drug.objects.filter(is_active=True)
 
+        query = self.request.query_params.get("search")
+
+        if query:
+            vector = (
+                SearchVector("name", weight="A") +
+                SearchVector("generic_name", weight="A") +
+                SearchVector("description", weight="B")
+            )
+
+            search_query = SearchQuery(query)
+
+            qs = (
+                qs.annotate(
+                    rank=SearchRank(vector, search_query)
+                )
+                .filter(rank__gte=0.1)
+                .order_by("-rank")
+            )
+
+        return qs
 # ─────────────────────────────────────────────────────────────
 # PAYMENT VIEW
 # ─────────────────────────────────────────────────────────────
