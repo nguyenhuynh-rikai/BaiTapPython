@@ -1,85 +1,94 @@
-# Crawl dữ liệu phòng trọ Đà Nẵng từ Nhà Tốt.
-# Cách chạy:
-#   .\.venv\Scripts\python.exe scripts\crawl_nhatot.py
-
-import csv
-from datetime import datetime
-
 import requests
+import math
+import time
+import csv
+import os
 
 
-# Nhà Tốt dùng chung API với Chợ Tốt.
-# region_v2=3017 là Đà Nẵng, cg=1050 là danh mục Phòng trọ.
-API_URL = "https://gateway.chotot.com/v1/public/ad-listing"
-OUTPUT_FILE = "data/nhatot_realtime.csv"
+def crawl_all_nhatot():
+    limit = 30
+    api_url = "https://gateway.chotot.com/v1/public/ad-listing"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
+    params = {"region_v2": 3017, "cg": 1050, "limit": limit, "o": 0}
+    response = requests.get(api_url, params=params, headers=headers, timeout=20)
+    print(response.url)
 
-def crawl_nhatot():
-    # Bước 1: Chuẩn bị tham số gửi lên API.
-    params = {
-        "region_v2": 3017,
-        "cg": 1050,
-        "limit": 30,
-        "o": 0,
-    }
+    if response.status_code != 200:
+        print("Lỗi khi gọi API")
+        return
 
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-    }
-
-    # Bước 2: Gửi request lấy dữ liệu JSON.
-    response = requests.get(API_URL, params=params, headers=headers, timeout=20)
-    response.raise_for_status()
     data = response.json()
 
-    rooms = []
+    total_ads = data.get("total", 0)
+    total_pages = math.ceil(total_ads / limit)
+    #math.ceil làm tròn
 
-    # Bước 3: Lặp qua từng tin đăng và lấy các trường cần dùng.
-    for item in data.get("ads", []):
-        room = {
-            "source": "nhatot",
-            "title": item.get("subject", ""),
-            "price": item.get("price", ""),
-            "price_text": item.get("price_string", ""),
-            "area_m2": item.get("size", ""),
-            "district": item.get("area_name", ""),
-            "ward": item.get("ward_name", ""),
-            "address": item.get("location", ""),
-            "description": item.get("body", ""),
-            "posted_at": item.get("date", ""),
-            "url": f"https://gateway.chotot.com/v1/public/ad-listing/{item.get('list_id', '')}",
-            "crawled_at": datetime.now().isoformat(timespec="seconds"),
-        }
-        rooms.append(room)
+    print(f"Hệ thống báo cáo: Có tổng cộng {total_ads} tin đăng.")
+    print(f"Bot sẽ tiến hành cào {total_pages} trang...\n")
+    print("-" * 30)
 
-    return rooms
+    all_ads = []
 
+    for page in range(1, total_pages + 1):
+        offset = (page - 1) * limit
+        print(f"Đang cào Trang {page}/{total_pages} (offset = {offset})...")
 
-def save_csv(rooms):
-    # Bước 4: Ghi dữ liệu ra file CSV.
+        params["o"] = offset
+
+        page_res = requests.get(api_url, params=params, headers=headers, timeout=20)
+
+        if page_res.status_code == 200:
+            page_data = page_res.json()
+            ads = page_data.get("ads", [])
+
+            all_ads.extend(ads)
+
+            print(f" -> Lấy thành công {len(ads)} tin.")
+        else:
+            print(f" -> Lỗi trang {page}")
+
+        time.sleep(3)
+
     columns = [
-        "source",
-        "title",
+        "ad_id",
+        "list_id",
+        "subject",
         "price",
-        "price_text",
-        "area_m2",
-        "district",
-        "ward",
-        "address",
-        "description",
-        "posted_at",
-        "url",
-        "crawled_at",
+        "price_string",
+        "size",
+        "area_name",
+        "ward_name",
+        "location",
+        "body",
+        "date",
     ]
 
-    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8-sig") as file:
+    os.makedirs("data",exist_ok=True)
+    with open("data/nhatot_all.csv", "w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=columns)
+
         writer.writeheader()
-        writer.writerows(rooms)
+
+        for ad in all_ads:
+            row = {
+                "ad_id": ad.get("ad_id", ""),
+                "list_id": ad.get("list_id", ""),
+                "subject": ad.get("subject", ""),
+                "price": ad.get("price", ""),
+                "price_string": ad.get("price_string", ""),
+                "size": ad.get("size", ""),
+                "area_name": ad.get("area_name", ""),
+                "ward_name": ad.get("ward_name", ""),
+                "location": ad.get("location", ""),
+                "body": ad.get("body", ""),
+                "date": ad.get("date", ""),
+            }
+
+            writer.writerow(row)
+
+    print(f"\nĐã lưu tổng cộng {len(all_ads)} tin vào data/nhatot_all.csv")
 
 
 if __name__ == "__main__":
-    rooms = crawl_nhatot()
-    save_csv(rooms)
-    print(f"Crawled {len(rooms)} rooms from NhaTot")
-    print(f"Saved to {OUTPUT_FILE}")
+    crawl_all_nhatot()

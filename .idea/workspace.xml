@@ -5,33 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="96b20b29-dda8-407f-b059-64516e11224e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/asgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/settings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/BaiTap/wsgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/context_processors.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/forms.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0002_student_slug.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/0003_studentcard.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/signals.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/tests.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/core/views.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/manage.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/static/css/style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/static/img/tn0.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/static/js/main.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/templates/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/BaiTap/templates/student_detail.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/properties/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hcm.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hn.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/nhatot_realtime.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/phongtro123_realtime.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/properties/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/properties/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/crawl_nhatot.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/crawl_nhatot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/crawl_phongtro123.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/crawl_rooms.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,31 +118,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "nguyen__day14",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Nguyen/BaiTapPython",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "actions.on.save",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;nguyen__day14&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Nguyen/BaiTapPython&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;actions.on.save&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Nguyen\BaiTapPython\data" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -185,7 +174,9 @@
       <workItem from="1778749410718" duration="1366000" />
       <workItem from="1778750813595" duration="16000" />
       <workItem from="1778750841667" duration="883000" />
-      <workItem from="1778751737452" duration="2119000" />
+      <workItem from="1778751737452" duration="3042000" />
+      <workItem from="1778812413666" duration="13077000" />
+      <workItem from="1779068344725" duration="10153000" />
     </task>
     <servers />
   </component>
