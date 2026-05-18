@@ -58,11 +58,11 @@ DOCS (Swagger / Redoc)
 """
 
 from django.urls import include, path
-# from drf_spectacular.views import (
-#     SpectacularAPIView,
-#     SpectacularRedocView,
-#     SpectacularSwaggerView,
-# )
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -109,9 +109,9 @@ urlpatterns = [
     path("payments/<uuid:pk>/", PaymentDetailView.as_view(), name="payment-detail"),
 
     # ── API Docs ─────────────────────────────────────────────
-    # path("schema/", SpectacularAPIView.as_view(),                          name="schema"),
-    # path("docs/",   SpectacularSwaggerView.as_view(url_name="schema"),     name="swagger-ui"),
-    # path("redoc/",  SpectacularRedocView.as_view(url_name="schema"),       name="redoc"),
+    path("schema/", SpectacularAPIView.as_view(),                          name="schema"),
+    path("docs/",   SpectacularSwaggerView.as_view(url_name="schema"),     name="swagger-ui"),
+    path("redoc/",  SpectacularRedocView.as_view(url_name="schema"),       name="redoc"),
 
     # ── Router (clinics, doctors, appointments, drugs) ───────
     path("api/", include(router.urls)),

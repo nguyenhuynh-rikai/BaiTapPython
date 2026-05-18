@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,3 +123,70 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "verbose": {
+            "format": (
+                "[{asctime}] "
+                "{levelname} "
+                "{name} "
+                "{module} "
+                "{funcName} "
+                "Line:{lineno} "
+                "- {message}"
+            ),
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} - {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/app.log"),
+            "formatter": "verbose",
+        },
+
+        "error_file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/error.log"),
+            "formatter": "verbose",
+            "level": "ERROR",
+        },
+    },
+
+    "loggers": {
+
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+
+        "django.request": {
+            "handlers": ["error_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+
+        "app": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}

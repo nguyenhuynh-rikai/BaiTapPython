@@ -81,14 +81,9 @@ class StandardPagination(PageNumberPagination):
             "results":  data,
         })
 
-
-# ─────────────────────────────────────────────────────────────
-# AUTH VIEWS
-# ─────────────────────────────────────────────────────────────
-
 class RegisterView(generics.CreateAPIView):
     """
-    POST /api/auth/register/
+    POST /auth/register/
     Đăng ký tài khoản mới. Không cần xác thực.
     """
     permission_classes = [AllowAny]
@@ -107,7 +102,7 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(APIView):
     """
-    POST /api/auth/login/
+    POST /auth/login/
     Trả về JWT access + refresh token.
     """
     permission_classes = [AllowAny]
@@ -121,8 +116,8 @@ class LoginView(APIView):
 
 class MeView(generics.RetrieveUpdateAPIView):
     """
-    GET  /api/auth/me/  — xem thông tin bản thân
-    PATCH /api/auth/me/ — cập nhật full_name, phone
+    GET  /auth/me/  — xem thông tin bản thân
+    PATCH /auth/me/ — cập nhật full_name, phone
     """
     permission_classes = [IsAuthenticated]
     serializer_class   = UserMeSerializer
@@ -133,7 +128,7 @@ class MeView(generics.RetrieveUpdateAPIView):
 
 class ChangePasswordView(APIView):
     """
-    POST /api/auth/change-password/
+    POST /auth/change-password/
     Đổi mật khẩu — yêu cầu đăng nhập.
     """
     permission_classes = [IsAuthenticated]
@@ -155,11 +150,11 @@ class ChangePasswordView(APIView):
 
 class ClinicViewSet(ModelViewSet):
     """
-    GET    /api/clinics/         — danh sách phòng khám
-    POST   /api/clinics/         — tạo mới (admin)
-    GET    /api/clinics/{id}/    — chi tiết
-    PATCH  /api/clinics/{id}/    — cập nhật (admin)
-    DELETE /api/clinics/{id}/    — xoá (admin)
+    GET    /clinics/         — danh sách phòng khám
+    POST   /clinics/         — tạo mới (admin)
+    GET    /clinics/{id}/    — chi tiết
+    PATCH  /clinics/{id}/    — cập nhật (admin)
+    DELETE /clinics/{id}/    — xoá (admin)
     """
     serializer_class   = ClinicSerializer
     permission_classes = [ReadOnlyOrAdmin]
@@ -266,8 +261,8 @@ class DoctorViewSet(
 
 class PatientMeView(generics.RetrieveUpdateAPIView):
     """
-    GET   /api/patients/me/   — xem hồ sơ bản thân
-    PATCH /api/patients/me/   — cập nhật hồ sơ
+    GET   /patients/me/   — xem hồ sơ bản thân
+    PATCH /patients/me/   — cập nhật hồ sơ
     """
     permission_classes = [IsPatient]
 
@@ -290,7 +285,7 @@ class PatientMeView(generics.RetrieveUpdateAPIView):
 
 class PatientAppointmentsView(generics.ListAPIView):
     """
-    GET /api/patients/me/appointments/?status=&from_date=
+    GET /patients/me/appointments/?status=&from_date=
     Lịch sử khám của bệnh nhân đang đăng nhập.
     """
     permission_classes = [IsPatient]
@@ -336,8 +331,8 @@ class PatientAppointmentsView(generics.ListAPIView):
 
 class AvailableSlotsView(APIView):
     """
-    GET /api/slots/available/?doctor_id=&date=YYYY-MM-DD
-    GET /api/slots/available/?specialty=cardiology&date=YYYY-MM-DD
+    GET /slots/available/?doctor_id=&date=YYYY-MM-DD
+    GET /slots/available/?specialty=cardiology&date=YYYY-MM-DD
     Trả danh sách slot trống. Cache 60 giây trong SlotEngine.
     """
     permission_classes = [IsAuthenticated]
@@ -366,12 +361,12 @@ class AppointmentViewSet(
     GenericViewSet,
 ):
     """
-    POST   /api/appointments/              — đặt lịch (patient)
-    GET    /api/appointments/{id}/         — chi tiết
-    DELETE /api/appointments/{id}/         — huỷ lịch
-    PATCH  /api/appointments/{id}/confirm/ — xác nhận (doctor/admin)
-    GET    /api/appointments/{id}/medical-record/ — xem hồ sơ
-    POST   /api/appointments/{id}/medical-record/ — tạo hồ sơ (doctor)
+    POST   /appointments/              — đặt lịch (patient)
+    GET    /appointments/{id}/         — chi tiết
+    DELETE /appointments/{id}/         — huỷ lịch
+    PATCH  /appointments/{id}/confirm/ — xác nhận (doctor/admin)
+    GET    /appointments/{id}/medical-record/ — xem hồ sơ
+    POST   /appointments/{id}/medical-record/ — tạo hồ sơ (doctor)
     """
     permission_classes = [IsAuthenticated]
     pagination_class   = StandardPagination
@@ -393,7 +388,7 @@ class AppointmentViewSet(
             return qs.filter(patient__user=user)
         if user.role == "doctor":
             return qs.filter(doctor__user=user)
-        return qs   # admin thấy tất cả
+        return qs
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -525,8 +520,8 @@ class AppointmentViewSet(
 
 class DrugViewSet(ReadOnlyModelViewSet):
     """
-    GET /api/drugs/        — tìm kiếm danh mục thuốc
-    GET /api/drugs/{id}/   — chi tiết thuốc
+    GET /drugs/        — tìm kiếm danh mục thuốc
+    GET /drugs/{id}/   — chi tiết thuốc
     Full-text search qua ?search= (tên, hoạt chất, mô tả).
     """
     serializer_class   = DrugSerializer
@@ -548,8 +543,8 @@ class DrugViewSet(ReadOnlyModelViewSet):
 
 class PaymentDetailView(generics.RetrieveUpdateAPIView):
     """
-    GET   /api/payments/{id}/  — xem thông tin thanh toán
-    PATCH /api/payments/{id}/  — cập nhật trạng thái (admin)
+    GET   /payments/{id}/  — xem thông tin thanh toán
+    PATCH /payments/{id}/  — cập nhật trạng thái (admin)
     """
     serializer_class   = PaymentSerializer
     permission_classes = [IsAuthenticated]
