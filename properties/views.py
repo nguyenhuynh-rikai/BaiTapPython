@@ -1,5 +1,6 @@
 from django.db.models import Avg, Count, Min, Max
 from django.core.cache import cache
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser
@@ -53,19 +54,36 @@ class AmenityViewSet(viewsets.ModelViewSet):
 class PropertyViewSet(viewsets.ModelViewSet):
     serializer_class = PropertySerializer
     permission_classes = [AllowAny]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["title", "description", "address", "district__name", "ward__name"]
+    # filter_backends giữ lại OrderingFilter, còn SearchFilter sẽ được xử lý thủ công bằng FTS trong get_queryset
+    filter_backends = [filters.OrderingFilter]
     ordering_fields = ["price", "area", "price_per_m2", "created_at"]
     ordering = ["-created_at"]
     cache_timeout = 60 * 5
 
     def get_queryset(self):
+        # Tối ưu truy vấn tránh N+1
         queryset = (
             Property.objects.select_related("category", "district", "ward")
             .prefetch_related("amenities", "images")
             .all()
         )
 
+        # 1. Tích hợp Full-text Search nâng cao (Task 11)
+        search_query = self.request.query_params.get("search")
+        if search_query:
+            # Gán trọng số: Tiêu đề (A - Cao nhất), Địa chỉ (B), Mô tả (C)
+            vector = (
+                    SearchVector("title", weight="A") +
+                    SearchVector("address", weight="B") +
+                    SearchVector("description", weight="C")
+            )
+            query = SearchQuery(search_query)
+            # Annotate điểm xếp hạng (rank) và lọc những kết quả có liên quan
+            queryset = queryset.annotate(
+                rank=SearchRank(vector, query)
+            ).filter(rank__gte=0.05).order_by("-rank")
+
+        # 2. Các bộ lọc thông thường (Task 5 Logic)
         source = self.request.query_params.get("source")
         district = self.request.query_params.get("district")
         min_price = self.request.query_params.get("min_price")
