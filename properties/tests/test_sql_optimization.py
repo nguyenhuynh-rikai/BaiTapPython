@@ -32,6 +32,7 @@ class SQLQueryOptimizationTests(TestCase):
         Số lượng câu lệnh SQL truy vấn danh sách bài đăng phải giữ nguyên không đổi
         dù trong database có 1 hay nhiều bài đăng.
         """
+        import json
         # 1. Tạo 1 bài đăng đầu tiên
         self.create_dummy_property("first")
 
@@ -50,4 +51,5 @@ class SQLQueryOptimizationTests(TestCase):
         with self.assertNumQueries(3):
             response = self.client.get('/api/properties/')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.data), 5)
+            data = json.loads(response.content)
+            self.assertEqual(len(data), 5)
