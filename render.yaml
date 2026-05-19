@@ -1,7 +1,6 @@
 databases:
   - name: clinic-db
     databaseName: clinicdb
-    user: postgres
     plan: free
 
 services:
@@ -9,6 +8,7 @@ services:
     name: clinic-redis
     plan: free
     maxmemoryPolicy: noeviction
+    ipAllowList: []
 
   - type: web
     name: clinic-web
