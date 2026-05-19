@@ -23,7 +23,7 @@ class TestLogExecution(unittest.TestCase):
         """@log_execution không thay đổi giá trị trả về."""
         import sys, os
         sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-        from decorators import log_execution
+        from app.decorators import log_execution
 
         @log_execution
         def add(a, b):
@@ -33,7 +33,7 @@ class TestLogExecution(unittest.TestCase):
 
     def test_re_raises_exception(self):
         """@log_execution phải re-raise exception gốc."""
-        from decorators import log_execution
+        from app.decorators import log_execution
 
         @log_execution
         def broken():
@@ -44,7 +44,7 @@ class TestLogExecution(unittest.TestCase):
 
     def test_preserves_function_name(self):
         """functools.wraps phải giữ __name__ và __doc__."""
-        from decorators import log_execution
+        from app.decorators import log_execution
 
         @log_execution
         def my_function():
@@ -56,7 +56,7 @@ class TestLogExecution(unittest.TestCase):
 
     def test_timing_roughly_correct(self):
         """Decorator không làm chậm hơn 50ms so với hàm trống."""
-        from decorators import log_execution
+        from app.decorators import log_execution
 
         @log_execution
         def noop():
@@ -75,7 +75,7 @@ class TestRequireRole(unittest.TestCase):
     def setUp(self):
         import sys, os
         sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-        from decorators import require_role, PermissionDeniedError
+        from app.decorators import require_role, PermissionDeniedError
         self.require_role = require_role
         self.PermissionDeniedError = PermissionDeniedError
 
@@ -124,12 +124,12 @@ class TestCacheResult(unittest.TestCase):
 
     def test_second_call_uses_cache(self):
         """Hàm chỉ được gọi 1 lần khi cache hit."""
-        from decorators import cache_result, _MEMORY_CACHE
+        from app.decorators import cache_result, _MEMORY_CACHE
         _MEMORY_CACHE.clear()
 
         call_count = 0
 
-        with patch("decorators.cache") as mock_cache:
+        with patch("app.decorators.cache") as mock_cache:
             mock_cache.get.return_value = None   # cache miss lần đầu
 
             @cache_result(ttl=60, key_prefix="test")
@@ -147,12 +147,12 @@ class TestCacheResult(unittest.TestCase):
 
     def test_no_cache_bypasses(self):
         """no_cache=True luôn gọi lại hàm."""
-        from decorators import cache_result, _MEMORY_CACHE
+        from app.decorators import cache_result, _MEMORY_CACHE
         _MEMORY_CACHE.clear()
 
         call_count = 0
 
-        with patch("decorators.cache") as mock_cache:
+        with patch("app.decorators.cache") as mock_cache:
             mock_cache.get.return_value = 99   # có cache
 
             @cache_result(ttl=60)
@@ -168,10 +168,10 @@ class TestCacheResult(unittest.TestCase):
 
     def test_redis_down_falls_back_to_memory(self):
         """Khi Redis lỗi, dùng memory cache."""
-        from decorators import cache_result, _MEMORY_CACHE
+        from app.decorators import cache_result, _MEMORY_CACHE
         _MEMORY_CACHE.clear()
 
-        with patch("decorators.cache") as mock_cache:
+        with patch("app.decorators.cache") as mock_cache:
             mock_cache.get.side_effect = Exception("Redis down")
             mock_cache.set.side_effect = Exception("Redis down")
 
@@ -208,8 +208,8 @@ class TestSlotEngineSplitSlots(unittest.TestCase):
         return schedule
 
     def _engine(self):
-        with patch("slot_engine.SlotEngine.__init__", lambda self: None):
-            from slot_engine import SlotEngine
+        with patch("app.slot_engine.SlotEngine.__init__", lambda self: None):
+            from app.slot_engine import SlotEngine
             engine = SlotEngine.__new__(SlotEngine)
         return engine
 
@@ -246,8 +246,8 @@ class TestSlotEngineSplitSlots(unittest.TestCase):
 class TestSlotEngineCheckConflict(unittest.TestCase):
 
     def _make_engine_with_mocks(self, existing_appointments):
-        with patch("slot_engine.SlotEngine.__init__", lambda self: None):
-            from slot_engine import SlotEngine
+        with patch("app.slot_engine.SlotEngine.__init__", lambda self: None):
+            from app.slot_engine import SlotEngine
             engine = SlotEngine.__new__(SlotEngine)
 
         mock_slot_qs = MagicMock()
@@ -316,7 +316,7 @@ class TestSlotEngineCheckConflict(unittest.TestCase):
 class TestDoctorWorkloadDTO(unittest.TestCase):
 
     def test_utilization_calculated_correctly(self):
-        from slot_engine import DoctorWorkload
+        from app.slot_engine import DoctorWorkload
         wl = DoctorWorkload(
             doctor_id="x",
             doctor_name="Dr. Test",
@@ -329,7 +329,7 @@ class TestDoctorWorkloadDTO(unittest.TestCase):
         self.assertEqual(wl.utilization_pct, 75.0)
 
     def test_zero_total_slots_no_division_error(self):
-        from slot_engine import DoctorWorkload
+        from app.slot_engine import DoctorWorkload
         wl = DoctorWorkload(
             doctor_id="x",
             doctor_name="Dr. Test",
@@ -346,7 +346,7 @@ class TestAppointmentDTO(unittest.TestCase):
 
     def test_to_dict_serializable(self):
         import json
-        from appointment_service import AppointmentDTO
+        from app.appointment_service import AppointmentDTO
 
         dto = AppointmentDTO(
             id="abc",

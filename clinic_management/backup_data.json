@@ -1,0 +1,23 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2026-05-15T07:49:48.030Z",
+    "user": "60fe6a75-6c80-42a3-b38d-e2d5537279c2",
+    "content_type": 8,
+    "object_id": "a03e01bd-8324-4f1d-ad0e-e0acc9febddd",
+    "object_repr": "Phong kham1",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2026-05-15T07:50:09.107Z",
+    "user": "60fe6a75-6c80-42a3-b38d-e2d5537279c2",
+    "content_type": 9,
+    "object_id": "c746fcd1-9044-422f-ac1a-9aa697051186",
+    "object_repr": 
