@@ -127,6 +127,11 @@ STATIC_URL = "static/"
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Tự động tạo thư mục logs nếu chưa tồn tại
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR, exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
