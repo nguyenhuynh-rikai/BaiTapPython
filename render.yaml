@@ -1,0 +1,48 @@
+databases:
+  - name: clinic-db
+    databaseName: clinicdb
+    plan: free
+
+services:
+  - type: redis
+    name: clinic-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  - type: web
+    name: clinic-web
+    env: docker
+    plan: free
+    rootDir: clinic_management
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: clinic-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: clinic-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: clinic-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: clinic-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: clinic-db
+          property: password
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: clinic-redis
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: clinic_management.settings.production
+      - key: ALLOWED_HOSTS
+        value: "*"

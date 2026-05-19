@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "Waiting for postgres..."
+while ! nc -z "${DB_HOST:-db}" "${DB_PORT:-5432}"; do
+  sleep 0.1
+done
+echo "PostgreSQL started"
+
+echo "Running migrations..."
+python manage.py migrate --noinput
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
+echo "Starting server..."
+python manage.py runserver 0.0.0.0:8000
