@@ -17,7 +17,7 @@ def measure_time(func):
         result = func(*args, **kwargs)
 
         end = time.time()
-        print(f"{func.__name__} finished in {end - start:.2f} seconds")
+        logger.info("%s finished in %.2f seconds", func.__name__, end - start)
 
         return result
 
@@ -106,11 +106,20 @@ class PropertyImportService:
         # Method chinh: doc toan bo CSV va import tung dong.
         # DictReader bien moi dong CSV thanh dict:
         # row["title"], row["price_vnd"], row["url"], ...
+        logger.info("Start importing properties from %s", self.csv_path)
+
         with open(self.csv_path, newline="", encoding="utf-8-sig") as file:
             reader = csv.DictReader(file)
 
             for row in reader:
                 self.import_row(row)
+
+        logger.info(
+            "Import finished: created=%s updated=%s skipped=%s",
+            self.created_count,
+            self.updated_count,
+            self.skipped_count,
+        )
 
         return {
             "created": self.created_count,
@@ -136,6 +145,7 @@ class PropertyImportService:
 
         if not is_valid_property_data(title, source_url, price, area):
             self.skipped_count += 1
+            logger.warning("Skipped invalid property row: title=%s url=%s", title, source_url)
             return None
 
         category = self.get_or_create_category()

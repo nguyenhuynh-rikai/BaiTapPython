@@ -10,6 +10,7 @@ from .views import (
     WardViewSet,
 )
 from .auth_views import ChangePasswordAPIView, LoginAPIView, LogoutAPIView, RegisterAPIView
+from .task_views import ImportPropertiesTaskAPIView, TaskDetailAPIView, TaskListAPIView
 
 
 router = DefaultRouter()
@@ -26,5 +27,8 @@ urlpatterns = [
     path("auth/login/", LoginAPIView.as_view()),
     path("auth/change-password/", ChangePasswordAPIView.as_view()),
     path("auth/logout/", LogoutAPIView.as_view()),
+    path("tasks/import-properties/", ImportPropertiesTaskAPIView.as_view()),
+    path("tasks/", TaskListAPIView.as_view()),
+    path("tasks/<str:task_id>/", TaskDetailAPIView.as_view()),
     path("", include(router.urls)),
 ]

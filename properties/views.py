@@ -1,9 +1,11 @@
 from django.db.models import Avg, Count, Min, Max
+from django.core.cache import cache
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 
+from .cache_utils import bump_property_cache_version, make_property_cache_key
 from .models import Amenity, Category, District, Property, PropertyImage, Ward
 from .serializers import (
     AmenitySerializer,
@@ -55,6 +57,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     search_fields = ["title", "description", "address", "district__name", "ward__name"]
     ordering_fields = ["price", "area", "price_per_m2", "created_at"]
     ordering = ["-created_at"]
+    cache_timeout = 60 * 5
 
     def get_queryset(self):
         queryset = (
@@ -96,18 +99,31 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def stats(self, request):
-        queryset = self.get_queryset()
-        data = queryset.aggregate(
-            total=Count("id"),
-            min_price=Min("price"),
-            max_price=Max("price"),
-            avg_price=Avg("price"),
-            min_area=Min("area"),
-            max_area=Max("area"),
-            avg_area=Avg("area"),
-        )
+        cache_key = make_property_cache_key("stats", request.query_params)
+        data = cache.get(cache_key)
+
+        if data is None:
+            queryset = self.get_queryset()
+            data = queryset.aggregate(
+                total=Count("id"),
+                min_price=Min("price"),
+                max_price=Max("price"),
+                avg_price=Avg("price"),
+                min_area=Min("area"),
+                max_area=Max("area"),
+                avg_area=Avg("area"),
+            )
+            cache.set(cache_key, data, self.cache_timeout)
+            data["cache"] = "miss"
+        else:
+            data["cache"] = "hit"
 
         return Response(data)
+
+    @action(detail=False, methods=["post"], permission_classes=[IsAdminUser])
+    def clear_cache(self, request):
+        version = bump_property_cache_version()
+        return Response({"detail": "Property cache cleared.", "cache_version": version})
 
 
 class PropertyImageViewSet(viewsets.ModelViewSet):
