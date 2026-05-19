@@ -24,10 +24,7 @@ services:
   - type: redis
     name: baitappython-redis
     plan: free
-    ipAllowList: [] # Chỉ cho phép kết nối nội bộ trong Render
 
 databases:
   - name: baitappython-db
-    databaseName: housing_db
-    user: housing_user
     plan: free
