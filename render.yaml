@@ -29,5 +29,5 @@ services:
 databases:
   - name: baitappython-db
     databaseName: housing_db
-    user: postgres
+    user: housing_user
     plan: free
