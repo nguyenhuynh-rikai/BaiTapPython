@@ -45,3 +45,6 @@ tzdata==2026.2
 uritemplate==4.2.0
 urllib3==2.7.0
 django-redis==5.4.0
+django-environ==0.13.0
+gunicorn==22.0.0
+whitenoise==6.7.0
