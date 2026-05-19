@@ -58,33 +58,14 @@ jobs:
         coverage run manage.py test properties
         coverage report -m
 
-  # === BƯỚC 2: CONTINUOUS DEPLOYMENT (TRIỂN KHAI LÊN SERVER) ===
+  # === BƯỚC 2: CONTINUOUS DEPLOYMENT (TRIỂN KHAI LÊN RENDER) ===
   deploy:
-    name: Deploy to Production
+    name: Deploy to Render
     needs: test # Bắt buộc phải pass qua bước "test" ở trên mới được deploy
     runs-on: ubuntu-latest
-    if: false # github.ref == 'refs/heads/nguyen_day14' || github.ref == 'refs/heads/main' # Tạm tắt cho đến khi có server thật
+    if: github.ref == 'refs/heads/nguyen_day14' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
-    - name: Deploy to Server via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          cd /path/to/your/server/BaiTapPython
-          # Pull code mới nhất từ GitHub
-          git pull origin main
-          
-          # Tải lại file cấu hình biến môi trường (nếu cần)
-          # source .env
-          
-          # Build lại image nếu có thay đổi trong thư viện
-          docker-compose up --build -d web
-          
-          # Chạy tự động migrate database
-          docker-compose exec -T web python manage.py migrate --noinput
-          
-          # Xóa các file tĩnh cũ và gom lại file tĩnh mới (nếu dự án có cấu hình static files)
-          # docker-compose exec -T web python manage.py collectstatic --noinput
+    - name: Trigger Render Deploy Hook
+      run: |
+        curl -f -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}"
