@@ -24,6 +24,7 @@ services:
   - type: redis
     name: baitappython-redis
     plan: free
+    ipAllowList: []
 
 databases:
   - name: baitappython-db
