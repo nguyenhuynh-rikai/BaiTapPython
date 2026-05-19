@@ -5,7 +5,7 @@ import os
 DEBUG = False
 
 # Remember to set ALLOWED_HOSTS in production environment
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 DATABASES = {
     'default': {
