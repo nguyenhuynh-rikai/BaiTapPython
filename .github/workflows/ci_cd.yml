@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "nguyen_day14", "main", "master" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "nguyen_day14", "main", "master" ]
 
 jobs:
   # === BƯỚC 1: CONTINUOUS INTEGRATION (KIỂM THỬ TỰ ĐỘNG) ===
@@ -42,7 +42,7 @@ jobs:
     name: Deploy to Production
     needs: test # Bắt buộc phải pass qua bước "test" ở trên mới được deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' # Chỉ deploy khi code được merge vào nhánh chính
+    if: false # github.ref == 'refs/heads/nguyen_day14' || github.ref == 'refs/heads/main' # Tạm tắt cho đến khi có server thật
 
     steps:
     - name: Deploy to Server via SSH

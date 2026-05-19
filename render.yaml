@@ -5,7 +5,7 @@ services:
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
     startCommand: "gunicorn housing_project.wsgi:application"
     plan: free
-    branch: main
+    branch: nguyen_day14
     envVars:
       - key: DJANGO_ENV
         value: production
