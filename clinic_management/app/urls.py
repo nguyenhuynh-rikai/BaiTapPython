@@ -64,7 +64,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 from app.views import (
     AppointmentViewSet,
@@ -79,6 +79,8 @@ from app.views import (
     PatientMeView,
     PaymentDetailView,
     RegisterView,
+    ExportDrugsExcelView,
+    ExportDrugsPdfView,
 )
 
 # ── Router ───────────────────────────────────────────────────
@@ -95,6 +97,7 @@ urlpatterns = [
     path("api/auth/register/",        RegisterView.as_view(),       name="auth-register"),
     path("api/auth/login/",           LoginView.as_view(),          name="auth-login"),
     path("api/auth/token/refresh/",   TokenRefreshView.as_view(),   name="auth-token-refresh"),
+    path("api/auth/token",            TokenObtainPairView.as_view(), name="auth-token"),
     path("api/auth/me/",              MeView.as_view(),             name="auth-me"),
     path("api/auth/change-password/", ChangePasswordView.as_view(), name="auth-change-password"),
 
@@ -112,7 +115,12 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(),                          name="schema"),
     path("api/docs/",   SpectacularSwaggerView.as_view(url_name="schema"),     name="swagger-ui"),
     path("api/redoc/",  SpectacularRedocView.as_view(url_name="schema"),       name="redoc"),
+    path("api/drugs/export/excel/",ExportDrugsExcelView.as_view()),
 
+    path("api/drugs/export/pdf/", ExportDrugsPdfView.as_view()
+    ),
     # ── Router (clinics, doctors, appointments, drugs) ───────
     path("api/", include(router.urls)),
 ]
+
+

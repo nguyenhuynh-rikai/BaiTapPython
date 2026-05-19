@@ -1,6 +1,6 @@
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.contrib.postgres.indexes import GinIndex
+from django.db.models import Index
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -297,8 +297,8 @@ class Drug(TimeStampedModel):
     id           = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name         = models.CharField(max_length=200, db_index=True)
     generic_name = models.CharField(max_length=200, blank=True, help_text="Tên hoạt chất")
-    category     = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
-    unit         = models.CharField(max_length=20, default="viên", help_text="Đơn vị: viên, ml, gói …")
+    category     = models.CharField(max_length=400, choices=Category.choices, default=Category.OTHER)
+    unit         = models.CharField(max_length=400, default="viên", help_text="Đơn vị: viên, ml, gói …")
     description  = models.TextField(blank=True)
     side_effects = models.TextField(blank=True)
     is_active    = models.BooleanField(default=True)
@@ -306,12 +306,10 @@ class Drug(TimeStampedModel):
     class Meta:
         db_table = "drugs"
         verbose_name = "Drug"
+
         indexes = [
             models.Index(fields=["name"]),
             models.Index(fields=["category", "is_active"]),
-            GinIndex(
-                fields=["name"]
-            )
         ]
 
     def __str__(self):

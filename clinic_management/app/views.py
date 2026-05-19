@@ -61,6 +61,16 @@ from .serializers import (
 )
 from .appointment_service import AppointmentService
 from .slot_engine import SlotEngine
+from io import BytesIO
+
+from django.http import HttpResponse
+from openpyxl import Workbook
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from rest_framework.views import APIView
+
+from app.models import Drug
+
 
 logger = logging.getLogger("mediflow.api")
 
@@ -326,7 +336,6 @@ class PatientAppointmentsView(generics.ListAPIView):
 
         return Response([apt.to_dict() for apt in appointments])
 
-
 # ─────────────────────────────────────────────────────────────
 # SLOT VIEWS
 # ─────────────────────────────────────────────────────────────
@@ -578,3 +587,105 @@ class PaymentDetailView(generics.RetrieveUpdateAPIView):
         if self.request.method in ("PUT", "PATCH"):
             return [IsAdmin()]
         return [IsAuthenticated()]
+
+
+class ExportDrugsExcelView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+
+        workbook = Workbook()
+
+        sheet = workbook.active
+        sheet.title = "Drugs"
+
+        headers = [
+            "Name",
+            "Generic Name",
+            "Category",
+            "Unit",
+            "Active"
+        ]
+
+        sheet.append(headers)
+
+        drugs = Drug.objects.all()
+
+        for drug in drugs:
+
+            sheet.append([
+                drug.name,
+                drug.generic_name,
+                drug.category,
+                drug.unit,
+                drug.is_active,
+            ])
+
+        response = HttpResponse(
+            content_type=(
+                "application/vnd.openxmlformats-"
+                "officedocument.spreadsheetml.sheet"
+            )
+        )
+
+        response[
+            "Content-Disposition"
+        ] = 'attachment; filename="drugs.xlsx"'
+
+        workbook.save(response)
+
+        return response
+
+
+class ExportDrugsPdfView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+
+        buffer = BytesIO()
+
+        pdf = canvas.Canvas(
+            buffer,
+            pagesize=letter
+        )
+
+        y = 750
+
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(200, y, "Drugs Report")
+
+        y -= 40
+
+        pdf.setFont("Helvetica", 12)
+
+        drugs = Drug.objects.all()
+
+        for drug in drugs:
+
+            text = (
+                f"{drug.name} | "
+                f"{drug.category} | "
+                f"{drug.unit}"
+            )
+
+            pdf.drawString(50, y, text)
+
+            y -= 20
+
+            if y < 50:
+                pdf.showPage()
+                y = 750
+
+        pdf.save()
+
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer,
+            content_type="application/pdf"
+        )
+
+        response[
+            "Content-Disposition"
+        ] = 'attachment; filename="drugs.pdf"'
+
+        return response
