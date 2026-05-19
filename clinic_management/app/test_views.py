@@ -161,6 +161,8 @@ class AdditionalTests(APITestCase):
 
     def test_appointment_medical_record(self):
         self.client.force_authenticate(user=self.doc_user)
+        self.apt.status = "confirmed"
+        self.apt.save()
         url = reverse('appointment-medical-record', kwargs={'pk': self.apt.id})
         data = {
             "diagnosis": "Sick",

@@ -60,7 +60,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data: dict) -> User:
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        if user.role == User.Role.PATIENT:
+            from .models import Patient
+            Patient.objects.create(user=user)
+        return user
 
 
 class LoginSerializer(serializers.Serializer):
