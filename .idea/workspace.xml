@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="96b20b29-dda8-407f-b059-64516e11224e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/properties/management/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/properties/management/commands/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/properties/management/commands/import_csv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/properties/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/properties/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/properties/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/properties/tests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,6 +111,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "JavaScript Debug.class_index.html.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -148,6 +146,16 @@
       <recent name="C:\Nguyen\BaiTapPython\data" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="class_index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/BaiTapPython/htmlcov/class_index.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.class_index.html" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -178,7 +186,7 @@
       <workItem from="1778812413666" duration="13077000" />
       <workItem from="1779068344725" duration="10596000" />
       <workItem from="1779080777367" duration="56000" />
-      <workItem from="1779154517597" duration="10875000" />
+      <workItem from="1779154517597" duration="14232000" />
     </task>
     <servers />
   </component>

@@ -9,10 +9,10 @@ User = get_user_model()
 
 class TaskViewsTests(APITestCase):
     def setUp(self):
-        self.admin_user = User.objects.create_superuser(username="admin", password="AdminPassword123!")
+        self.admin_user = User.objects.create_superuser(username="admin", password="AdminPassword123!")  # type: ignore
         self.admin_token = Token.objects.create(user=self.admin_user)
         
-        self.regular_user = User.objects.create_user(username="user", password="UserPassword123!")
+        self.regular_user = User.objects.create_user(username="user", password="UserPassword123!")  # type: ignore
         self.regular_token = Token.objects.create(user=self.regular_user)
         
         self.import_url = '/api/tasks/import-properties/'

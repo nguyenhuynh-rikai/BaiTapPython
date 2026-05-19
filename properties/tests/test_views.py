@@ -1,10 +1,6 @@
-# pyrefly: ignore [missing-import]
 from django.urls import reverse
-# pyrefly: ignore [missing-import]
 from rest_framework import status
-# pyrefly: ignore [missing-import]
 from rest_framework.test import APITestCase
-# pyrefly: ignore [missing-import]
 from django.contrib.auth import get_user_model
 from properties.models import Property, District, Category, Ward, Amenity, PropertyImage
 
@@ -12,7 +8,7 @@ User = get_user_model()
 
 class PropertyViewsTests(APITestCase):
     def setUp(self):
-        self.admin = User.objects.create_superuser(username="admin", password="pwd")
+        self.admin = User.objects.create_superuser(username="admin", password="pwd")  # type: ignore
         self.district = District.objects.create(name="Hải Châu")
         self.ward = Ward.objects.create(name="Thạch Thang", district=self.district)
         self.category = Category.objects.create(name="Phòng trọ", slug="phong-tro")

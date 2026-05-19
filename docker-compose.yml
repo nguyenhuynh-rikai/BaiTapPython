@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: housing_postgres_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=housing_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=No12345678
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: housing_redis_cache
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    container_name: housing_django_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-hw=(1ctr95aln%n^#_984g5()psm@9w0%%2foc45(4j5z8dxd4
+      - DJANGO_DEBUG=True
+      - DB_NAME=housing_db
+      - DB_USER=postgres
+      - DB_PASSWORD=No12345678
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

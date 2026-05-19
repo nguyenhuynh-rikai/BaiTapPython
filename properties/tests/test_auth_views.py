@@ -7,7 +7,7 @@ User = get_user_model()
 
 class AuthViewsTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser", password="TestPassword123!")
+        self.user = User.objects.create_user(username="testuser", password="TestPassword123!")  # type: ignore
         self.token = Token.objects.create(user=self.user)
         self.register_url = '/api/auth/register/'
         self.login_url = '/api/auth/login/'

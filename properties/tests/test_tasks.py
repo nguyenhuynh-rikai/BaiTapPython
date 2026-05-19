@@ -13,6 +13,7 @@ class TasksTests(TestCase):
         mock_instance.import_data.return_value = {"created": 10, "updated": 5, "skipped": 2}
         
         task = self.manager.start_import_properties("dummy.csv")
+        assert task is not None
         self.assertIn("id", task)
         self.assertIn(task["status"], ["queued", "running", "success"])
         self.assertEqual(task["csv_path"], "dummy.csv")
@@ -21,6 +22,7 @@ class TasksTests(TestCase):
         time.sleep(0.1)
         
         updated_task = self.manager.get_task(task["id"])
+        assert updated_task is not None
         self.assertEqual(updated_task["status"], "success")
         self.assertEqual(updated_task["result"], {"created": 10, "updated": 5, "skipped": 2})
 
@@ -30,16 +32,20 @@ class TasksTests(TestCase):
         mock_instance.import_data.side_effect = Exception("Test error")
         
         task = self.manager.start_import_properties("dummy.csv")
+        assert task is not None
         
         time.sleep(0.1)
         
         updated_task = self.manager.get_task(task["id"])
+        assert updated_task is not None
         self.assertEqual(updated_task["status"], "failed")
         self.assertEqual(updated_task["error"], "Test error")
 
     def test_list_tasks(self):
         task1 = self.manager.start_import_properties("dummy1.csv")
         task2 = self.manager.start_import_properties("dummy2.csv")
+        assert task1 is not None
+        assert task2 is not None
         
         tasks = self.manager.list_tasks()
         self.assertEqual(len(tasks), 2)

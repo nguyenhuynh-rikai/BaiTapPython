@@ -8,7 +8,7 @@ User = get_user_model()
 
 class SysAdminCommandTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="pwd")
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="pwd")  # type: ignore
         
         self.district = District.objects.create(name="Test District")
         self.category = Category.objects.create(name="Test Cat", slug="test-cat")
@@ -47,7 +47,9 @@ class SysAdminCommandTests(TestCase):
         
         self.assertIn("Đã dọn dẹp 2 bài đăng lỗi.", output)
         self.assertEqual(Property.objects.count(), 1)
-        self.assertEqual(Property.objects.first().title, "Valid Property")
+        first_prop = Property.objects.first()
+        assert first_prop is not None
+        self.assertEqual(first_prop.title, "Valid Property")
 
     def test_sys_admin_promote_success(self):
         out = StringIO()

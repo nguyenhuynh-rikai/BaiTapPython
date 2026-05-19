@@ -7,7 +7,7 @@ User = get_user_model()
 
 class AuthSerializersTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser", password="TestPassword123!")
+        self.user = User.objects.create_user(username="testuser", password="TestPassword123!")  # type: ignore
         self.factory = RequestFactory()
 
     def test_register_serializer_valid(self):
