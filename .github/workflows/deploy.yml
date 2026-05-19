@@ -70,23 +70,11 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/thanh_day14'
 
     steps:
-    - name: Execute remote deployment via SSH
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
-        script: |
-          cd /path/to/your/deployment/folder/BaiTapPython
-          git pull origin main
-          
-          # Di chuyển vào thư mục code chính
-          cd clinic_management
-          
-          # Build và restart lại các container với phiên bản code mới nhất
-          docker-compose down
-          docker-compose up -d --build
-          
-          # Xóa các image thừa để giải phóng dung lượng cho Server
-          docker image prune -f
+    - name: Trigger Render Deployment
+      if: env.RENDER_DEPLOY_HOOK_URL != ''
+      env:
+        RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      run: |
+        echo "Kích hoạt quá trình Deploy tự động trên Render..."
+        curl -X GET "$RENDER_DEPLOY_HOOK_URL"
+        echo -e "\nĐã gửi lệnh Deploy tới Render thành công!"
