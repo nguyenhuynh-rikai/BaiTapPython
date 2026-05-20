@@ -8,8 +8,9 @@ from .views import (
     PropertyImageViewSet,
     PropertyViewSet,
     WardViewSet,
+    FavoritePropertyViewSet,
 )
-from .auth_views import ChangePasswordAPIView, LoginAPIView, LogoutAPIView, RegisterAPIView
+from .auth_views import ChangePasswordAPIView, LoginAPIView, LogoutAPIView, RegisterAPIView, UserProfileAPIView
 from .task_views import ImportPropertiesTaskAPIView, TaskDetailAPIView, TaskListAPIView
 
 
@@ -20,11 +21,13 @@ router.register("wards", WardViewSet)
 router.register("amenities", AmenityViewSet)
 router.register("properties", PropertyViewSet, basename="property")
 router.register("property-images", PropertyImageViewSet)
+router.register("favorites", FavoritePropertyViewSet, basename="favorite")
 
 
 urlpatterns = [
     path("auth/register/", RegisterAPIView.as_view()),
     path("auth/login/", LoginAPIView.as_view()),
+    path("auth/profile/", UserProfileAPIView.as_view()),
     path("auth/change-password/", ChangePasswordAPIView.as_view()),
     path("auth/logout/", LogoutAPIView.as_view()),
     path("tasks/import-properties/", ImportPropertiesTaskAPIView.as_view()),

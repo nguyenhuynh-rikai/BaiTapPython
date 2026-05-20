@@ -1,12 +1,16 @@
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from .tasks import task_manager
+from .serializers import ImportPropertiesSerializer
 
 
+@extend_schema(tags=["System Administration"])
 class ImportPropertiesTaskAPIView(APIView):
     permission_classes = [IsAdminUser]
+    serializer_class = ImportPropertiesSerializer
 
     def post(self, request):
         csv_path = request.data.get("csv_path")
@@ -15,6 +19,7 @@ class ImportPropertiesTaskAPIView(APIView):
         return Response(task, status=202)
 
 
+@extend_schema(tags=["System Administration"])
 class TaskListAPIView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -22,6 +27,7 @@ class TaskListAPIView(APIView):
         return Response(task_manager.list_tasks())
 
 
+@extend_schema(tags=["System Administration"])
 class TaskDetailAPIView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -32,3 +38,4 @@ class TaskDetailAPIView(APIView):
             return Response({"detail": "Task not found."}, status=404)
 
         return Response(task)
+

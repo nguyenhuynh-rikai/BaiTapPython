@@ -3,6 +3,12 @@ from django.test import TestCase
 from properties.tasks import BackgroundTaskManager
 import time
 
+from django.conf import settings
+from housing_project.celery import app
+print("DEBUG: django CELERY_TASK_ALWAYS_EAGER =", getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', None))
+print("DEBUG: celery task_always_eager =", app.conf.task_always_eager)
+print("DEBUG: celery broker_url =", app.conf.broker_url)
+
 class TasksTests(TestCase):
     def setUp(self):
         self.manager = BackgroundTaskManager()

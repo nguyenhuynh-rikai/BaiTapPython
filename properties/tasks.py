@@ -4,96 +4,96 @@ import uuid
 from datetime import datetime
 
 from django.conf import settings
-from django.db import close_old_connections
+from celery import shared_task
+from celery.result import AsyncResult
 
 from .services import PropertyImportService
-
 
 logger = logging.getLogger(__name__)
 
 
+@shared_task(bind=True)
+def import_properties_task(self, csv_path):
+    """Celery task để import dữ liệu phòng trọ từ CSV chạy nền"""
+    logger.info("Celery task %s started with path %s", self.request.id, csv_path)
+    service = PropertyImportService(csv_path)
+    result = service.import_data()
+    logger.info("Celery task %s finished successfully", self.request.id)
+    return result
+
+
 class BackgroundTaskManager:
-    # Class nay quan ly task chay nen bang threading.
-    # Luu y: cach nay don gian de hoc/dev, khong phai giai phap production tot nhat.
+    # Class này làm nhiệm vụ bọc (Wrapper) ngoài Celery
+    # Giúp giữ nguyên giao diện gọi API /api/tasks/ và không phải sửa đổi Views/Tests
     def __init__(self):
         self.tasks = {}
         self.lock = threading.Lock()
 
     def start_import_properties(self, csv_path=None):
-        task_id = str(uuid.uuid4())
         csv_path = csv_path or settings.BASE_DIR / "data" / "rooms_cleaned.csv"
+
+        # Gọi Celery task chạy ngầm dưới nền
+        celery_task = import_properties_task.delay(str(csv_path))  # type: ignore
+        task_id = celery_task.id
 
         with self.lock:
             self.tasks[task_id] = {
                 "id": task_id,
                 "name": "import_properties",
-                "status": "queued",
                 "csv_path": str(csv_path),
-                "result": None,
-                "error": "",
                 "created_at": datetime.now().isoformat(timespec="seconds"),
-                "started_at": "",
-                "finished_at": "",
+                "result_obj": celery_task,
             }
-
-        thread = threading.Thread(
-            target=self._run_import_properties,
-            args=(task_id, str(csv_path)),
-            daemon=True,
-        )
-        thread.start()
 
         return self.get_task(task_id)
 
-    def _run_import_properties(self, task_id, csv_path):
-        self._update_task(task_id, status="running", started_at=datetime.now().isoformat(timespec="seconds"))
-
-        try:
-            # Moi thread nen dong connection cu de Django mo connection DB phu hop voi thread moi.
-            close_old_connections()
-
-            service = PropertyImportService(csv_path)
-            result = service.import_data()
-
-            self._update_task(
-                task_id,
-                status="success",
-                result=result,
-                finished_at=datetime.now().isoformat(timespec="seconds"),
-            )
-            logger.info("Background task %s finished successfully", task_id)
-        except Exception as exc:
-            logger.exception("Background task %s failed", task_id)
-            self._update_task(
-                task_id,
-                status="failed",
-                error=str(exc),
-                finished_at=datetime.now().isoformat(timespec="seconds"),
-            )
-        finally:
-            close_old_connections()
-
-    def _update_task(self, task_id, **values):
-        with self.lock:
-            task = self.tasks.get(task_id)
-
-            if task is None:
-                return
-
-            task.update(values)
-
     def get_task(self, task_id):
         with self.lock:
-            task = self.tasks.get(task_id)
-
-            if task is None:
+            task_meta = self.tasks.get(task_id)
+            if task_meta is None:
                 return None
 
-            return task.copy()
+            # Sử dụng trực tiếp đối tượng kết quả (có thể là EagerResult trong dev/test hoặc AsyncResult)
+            res = task_meta["result_obj"]
+
+            try:
+                status_raw = res.status
+                result_raw = res.result
+            except Exception as exc:
+                # Fallback nếu mất kết nối tới Redis backend ở môi trường không có Redis
+                logger.warning("Could not connect to Redis to get task status, fallback to queued. Error: %s", exc)
+                status_raw = "PENDING"
+                result_raw = None
+
+            status_map = {
+                "PENDING": "queued",
+                "STARTED": "running",
+                "RETRY": "running",
+                "SUCCESS": "success",
+                "FAILURE": "failed",
+            }
+            status = status_map.get(status_raw, "queued")
+
+            error_msg = ""
+            if status == "failed":
+                error_msg = str(result_raw) if result_raw else "Unknown error"
+
+            task = task_meta.copy()
+            # Loại bỏ result_obj trước khi trả về dữ liệu thuần túy cho API/views
+            task.pop("result_obj", None)
+            task.update({
+                "status": status,
+                "result": result_raw if status == "success" else None,
+                "error": error_msg,
+                "started_at": task_meta["created_at"] if status in ["running", "success", "failed"] else "",
+                "finished_at": datetime.now().isoformat(timespec="seconds") if status in ["success", "failed"] else "",
+            })
+            return task
 
     def list_tasks(self):
         with self.lock:
-            return [task.copy() for task in self.tasks.values()]
+            # Cập nhật thông tin mới nhất cho toàn bộ danh sách task từ Celery
+            return [self.get_task(tid) for tid in self.tasks.keys()]
 
 
 task_manager = BackgroundTaskManager()

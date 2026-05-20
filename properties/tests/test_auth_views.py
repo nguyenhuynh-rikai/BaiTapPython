@@ -51,3 +51,27 @@ class AuthViewsTests(APITestCase):
         response = self.client.post(self.logout_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(Token.objects.filter(user=self.user).exists())
+
+    def test_get_profile(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        response = self.client.get('/api/auth/profile/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], "testuser")
+
+    def test_put_profile(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        data = {
+            "first_name": "UpdatedName",
+            "last_name": "User",
+            "email": "updated@test.com"
+        }
+        response = self.client.put('/api/auth/profile/', data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, "UpdatedName")
+        self.assertEqual(self.user.email, "updated@test.com")
+
+    def test_profile_unauthenticated(self):
+        response = self.client.get('/api/auth/profile/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+

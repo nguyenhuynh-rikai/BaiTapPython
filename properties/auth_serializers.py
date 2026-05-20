@@ -27,7 +27,7 @@ class RegisterSerializer(serializers.Serializer):
     def create(self, validated_data):
         validated_data.pop("password_confirm")
 
-        user = User.objects.create_user(
+        user = User.objects.create_user(  # type: ignore
             username=validated_data["username"],
             email=validated_data.get("email", ""),
             password=validated_data["password"],
@@ -75,8 +75,16 @@ class ChangePasswordSerializer(serializers.Serializer):
         validate_password(attrs["new_password"], self.context["request"].user)
         return attrs
 
-    def save(self):
+    def save(self):  # type: ignore
         user = self.context["request"].user
         user.set_password(self.validated_data["new_password"])
         user.save()
         return user
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:  # type: ignore
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email", "date_joined"]
+        read_only_fields = ["id", "username", "date_joined"]
+

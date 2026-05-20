@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from properties.models import Property, District, Category, Ward, Amenity, PropertyImage
+from properties.models import Property, District, Category, Ward, Amenity, PropertyImage, FavoriteProperty
 
 User = get_user_model()
 
@@ -69,6 +69,38 @@ class PropertyViewsTests(APITestCase):
     def test_export_excel(self):
         res = self.client.get(f'{self.list_url}export_excel/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_favorite_toggle(self):
+        # Unauthenticated
+        response = self.client.post(f'{self.list_url}{self.property.id}/favorite/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticated - Add favorite
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.post(f'{self.list_url}{self.property.id}/favorite/')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(FavoriteProperty.objects.filter(user=self.admin, property=self.property).exists())
+
+        # Authenticated - Remove favorite
+        response = self.client.post(f'{self.list_url}{self.property.id}/favorite/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(FavoriteProperty.objects.filter(user=self.admin, property=self.property).exists())
+
+    def test_favorites_list(self):
+        self.client.force_authenticate(user=self.admin)
+        FavoriteProperty.objects.create(user=self.admin, property=self.property)
+        response = self.client.get('/api/favorites/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["property"], self.property.id)
+
+    def test_district_stats(self):
+        response = self.client.get(f'{self.list_url}district-stats/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(len(response.data) > 0)
+        self.assertEqual(response.data[0]["district__name"], "Hải Châu")
+        self.assertEqual(response.data[0]["total_listings"], 1)
+
 
 class OtherViewSetsTests(APITestCase):
     def test_simple_endpoints(self):

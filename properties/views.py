@@ -5,13 +5,14 @@ from django.db.models import Avg, Count, Min, Max
 from django.core.cache import cache
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.http import HttpResponse
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from .cache_utils import bump_property_cache_version, make_property_cache_key
-from .models import Amenity, Category, District, Property, PropertyImage, Ward
+from .models import Amenity, Category, District, FavoriteProperty, Property, PropertyImage, Ward
 from .serializers import (
     AmenitySerializer,
     CategorySerializer,
@@ -19,6 +20,7 @@ from .serializers import (
     PropertyImageSerializer,
     PropertySerializer,
     WardSerializer,
+    FavoritePropertySerializer,
 )
 
 # --- HÀM HỖ TRỢ XỬ LÝ KÝ TỰ LỖI CHO EXCEL ---
@@ -31,18 +33,21 @@ def clean_for_excel(value):
     return illegal_chars_re.sub("", value)
 
 
+@extend_schema(tags=["Metadata Lookup"])
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
 
 
+@extend_schema(tags=["Metadata Lookup"])
 class DistrictViewSet(viewsets.ModelViewSet):
     queryset = District.objects.all().order_by("name")
     serializer_class = DistrictSerializer
     permission_classes = [AllowAny]
 
 
+@extend_schema(tags=["Metadata Lookup"])
 class WardViewSet(viewsets.ModelViewSet):
     queryset = Ward.objects.select_related("district").all().order_by("district__name", "name")
     serializer_class = WardSerializer
@@ -56,12 +61,14 @@ class WardViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+@extend_schema(tags=["Metadata Lookup"])
 class AmenityViewSet(viewsets.ModelViewSet):
     queryset = Amenity.objects.all().order_by("name")
     serializer_class = AmenitySerializer
     permission_classes = [AllowAny]
 
 
+@extend_schema(tags=["Real Estate Core"])
 class PropertyViewSet(viewsets.ModelViewSet):
     serializer_class = PropertySerializer
     permission_classes = [AllowAny]
@@ -143,6 +150,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return Response(data)
 
     # --- TASK 12: EXPORT EXCEL ACTION ---
+    @extend_schema(tags=["Analytics & Reporting"])
     @action(detail=False, methods=["get"], url_path='export_excel')
     def export_excel(self, request):
         queryset = self.get_queryset()
@@ -157,8 +165,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 "Giá (VNĐ)": p.price,
                 "Diện tích (m2)": p.area,
                 "Quận": clean_for_excel(p.district.name) if p.district else "",
-                "Phường": clean_for_excel(p.ward.name) if p.ward else "",
-                "Địa chỉ": clean_for_excel(p.address),
                 "Nguồn": p.source_name,
                 "Link gốc": p.source_url,
                 "Ngày đăng": date_str,
@@ -174,6 +180,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = 'attachment; filename=danh_sach_phong_tro.xlsx'
         return response
 
+    @extend_schema(tags=["Analytics & Reporting"])
     @action(detail=False, methods=["get"])
     def stats(self, request):
         cache_key = make_property_cache_key("stats", request.query_params)
@@ -190,13 +197,48 @@ class PropertyViewSet(viewsets.ModelViewSet):
             data["cache"] = "hit"
         return Response(data)
 
+    @extend_schema(tags=["System Administration"], request=None)
     @action(detail=False, methods=["post"], permission_classes=[IsAdminUser])
     def clear_cache(self, request):
         version = bump_property_cache_version()
         return Response({"detail": "Property cache cleared.", "cache_version": version})
 
+    @extend_schema(tags=["Favorites"], request=None)
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk=None):
+        """Yêu thích hoặc hủy yêu thích một tin đăng phòng trọ (Toggle)"""
+        property_obj = self.get_object()
+        fav, created = FavoriteProperty.objects.get_or_create(user=request.user, property=property_obj)
+        if not created:
+            fav.delete()
+            return Response({"detail": "Đã xóa khỏi danh sách yêu thích."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Đã thêm vào danh sách yêu thích."}, status=status.HTTP_201_CREATED)
 
+    @extend_schema(tags=["Analytics & Reporting"])
+    @action(detail=False, methods=["get"], url_path="district-stats")
+    def district_stats(self, request):
+        """Thống kê chi tiết số tin đăng và mức giá/diện tích trung bình theo từng Quận/Huyện"""
+        stats = Property.objects.values("district__name").annotate(
+            total_listings=Count("id"),
+            avg_price=Avg("price"),
+            avg_price_per_m2=Avg("price_per_m2"),
+            avg_area=Avg("area")
+        ).filter(district__name__isnull=False).order_by("-total_listings")
+        return Response(stats)
+
+
+@extend_schema(tags=["Metadata Lookup"])
 class PropertyImageViewSet(viewsets.ModelViewSet):
     queryset = PropertyImage.objects.select_related("property").all()
     serializer_class = PropertyImageSerializer
     permission_classes = [AllowAny]
+
+
+@extend_schema(tags=["Favorites"])
+class FavoritePropertyViewSet(viewsets.ReadOnlyModelViewSet):
+    """Danh sách các tin đăng phòng trọ đã lưu của người dùng hiện tại"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = FavoritePropertySerializer
+
+    def get_queryset(self):
+        return FavoriteProperty.objects.filter(user=self.request.user).select_related("property")

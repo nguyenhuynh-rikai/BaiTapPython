@@ -58,3 +58,8 @@ LOGGING = {
         },
     },
 }
+
+# Cấu hình Celery chạy đồng bộ phục vụ kiểm thử và phát triển local dễ dàng
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = False
+

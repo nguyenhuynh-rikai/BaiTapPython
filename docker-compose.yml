@@ -29,8 +29,28 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SECRET_KEY=django-insecure-hw=(1ctr95aln%n^#_984g5()psm@9w0%%2foc45(4j5z8dxd4
-      - DJANGO_DEBUG=False
-      - DJANGO_ENV=production
+      - DJANGO_DEBUG=True
+      - DJANGO_ENV=development
+      - DB_NAME=housing_db
+      - DB_USER=postgres
+      - DB_PASSWORD=No12345678
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+
+  celery_worker:
+    build: .
+    container_name: housing_celery_worker
+    command: celery -A housing_project worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-hw=(1ctr95aln%n^#_984g5()psm@9w0%%2foc45(4j5z8dxd4
+      - DJANGO_DEBUG=True
+      - DJANGO_ENV=development
       - DB_NAME=housing_db
       - DB_USER=postgres
       - DB_PASSWORD=No12345678
