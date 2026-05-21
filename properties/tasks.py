@@ -97,3 +97,61 @@ class BackgroundTaskManager:
 
 
 task_manager = BackgroundTaskManager()
+
+
+@shared_task
+def send_appointment_email_task(appointment_id):
+    """
+    Celery task gửi email thông báo cho chủ trọ và khách thuê khi có lịch hẹn mới hoặc thay đổi trạng thái.
+    """
+    from django.core.mail import send_mail
+    from .models import ViewingAppointment
+    
+    try:
+        # select_related để tối ưu hóa truy vấn, tránh N+1 Query khi đọc thông tin guest/landlord/property
+        appointment = ViewingAppointment.objects.select_related("guest", "landlord", "property").get(id=appointment_id)
+    except ViewingAppointment.DoesNotExist:
+        logger.error("Lịch hẹn ID %s không tồn tại trên hệ thống.", appointment_id)
+        return False
+
+    guest = appointment.guest
+    landlord = appointment.landlord
+    property_obj = appointment.property
+
+    subject = f"[Tìm Kiếm Nhà Trọ] Cập nhật lịch hẹn xem phòng: {property_obj.title}"
+    
+    # Định nghĩa nội dung email chi tiết
+    message = (
+        f"Xin chào,\n\n"
+        f"Lịch hẹn xem phòng trọ '{property_obj.title}' đã có cập nhật mới:\n"
+        f"- Khách thuê: {guest.username} ({guest.email})\n"
+        f"- Chủ trọ: {landlord.username} ({landlord.email})\n"
+        f"- Thời gian hẹn: {appointment.appointment_date.strftime('%d/%m/%Y %H:%M')}\n"
+        f"- Trạng thái: {appointment.get_status_display()}\n"
+        f"- Ghi chú khách gửi: {appointment.note or 'Không có'}\n\n"
+        f"Vui lòng truy cập hệ thống để kiểm tra và xử lý.\n"
+        f"Trân trọng,\nBan quản trị hệ thống."
+    )
+
+    # Chỉ gửi email đến các địa chỉ hợp lệ
+    recipient_list = [email for email in [guest.email, landlord.email] if email]
+
+    if not recipient_list:
+        logger.warning("Không tìm thấy địa chỉ email của khách hoặc chủ trọ cho lịch hẹn ID %s", appointment_id)
+        return False
+
+    try:
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@timkiemnhatro.com")
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            fail_silently=False,
+        )
+        logger.info("Đã gửi email thông báo lịch hẹn ID %s tới %s", appointment_id, recipient_list)
+        return True
+    except Exception as e:
+        logger.error("Lỗi khi gửi email thông báo lịch hẹn ID %s: %s", appointment_id, str(e))
+        return False
+

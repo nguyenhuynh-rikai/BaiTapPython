@@ -1,3 +1,4 @@
+from __future__ import annotations
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -68,6 +69,12 @@ class Property(models.Model):
             models.Index(fields=["is_active"]),
         ]
 
+    # Type hints for dynamic reverse relationships (to satisfy static analysis/Pyrefly)
+    images: models.Manager[PropertyImage]
+    manager: PropertyManager
+    appointments: models.Manager[ViewingAppointment]
+    in_comparisons: models.Manager[ComparisonList]
+
     def __str__(self):
         return self.title
 
@@ -91,4 +98,69 @@ class FavoriteProperty(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.property.title}"
+
+
+class PropertyManager(models.Model):
+    """
+    Bảng mapping để gán quyền sở hữu phòng (Chủ trọ - Landlord) mà không sửa bảng Property.
+    """
+    property = models.OneToOneField(Property, on_delete=models.CASCADE, related_name="manager")
+    landlord = models.ForeignKey(User, on_delete=models.CASCADE, related_name="managed_properties")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["landlord"]),
+        ]
+
+    def __str__(self):
+        return f"{self.landlord.username} quản lý {self.property.title}"
+
+
+class ViewingAppointment(models.Model):
+    """
+    Bảng quản lý lịch hẹn xem phòng của Guest với Landlord.
+    """
+    STATUS_CHOICES = (
+        ("PENDING", "Chờ xác nhận"),
+        ("CONFIRMED", "Đã xác nhận"),
+        ("CANCELLED", "Đã hủy"),
+        ("COMPLETED", "Đã hoàn thành"),
+    )
+    
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="appointments")
+    guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name="guest_appointments")
+    # Lưu trực tiếp landlord ở đây để tối ưu hóa việc truy vấn danh sách lịch hẹn của landlord
+    landlord = models.ForeignKey(User, on_delete=models.CASCADE, related_name="landlord_appointments")
+    
+    appointment_date = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    note = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-appointment_date"]
+        indexes = [
+            models.Index(fields=["guest", "status"]),
+            models.Index(fields=["landlord", "status"]),
+            models.Index(fields=["appointment_date"]),
+        ]
+
+    def __str__(self):
+        return f"Lịch hẹn {self.guest.username} xem {self.property.title} lúc {self.appointment_date}"
+
+
+class ComparisonList(models.Model):
+    """
+    Bảng lưu danh sách phòng đang so sánh của User.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="comparison_list")
+    properties = models.ManyToManyField(Property, related_name="in_comparisons")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Danh sách so sánh của {self.user.username}"
+
 
