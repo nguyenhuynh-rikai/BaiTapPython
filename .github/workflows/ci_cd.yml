@@ -40,7 +40,7 @@ jobs:
       
     defaults:
       run:
-        working-directory: BE
+        working-directory: backend
 
     steps:
     - name: Checkout code
@@ -51,7 +51,7 @@ jobs:
       with:
         python-version: '3.13'
         cache: 'pip' # Tự động cache các thư viện để chạy nhanh hơn ở lần sau
-        cache-dependency-path: 'BE/requirements.txt'
+        cache-dependency-path: 'backend/requirements.txt'
 
     - name: Install dependencies
       run: |

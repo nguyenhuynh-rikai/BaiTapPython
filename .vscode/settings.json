@@ -4,6 +4,6 @@
   "python.analysis.venvPath": "${workspaceFolder}",
   "python.analysis.venv": ".venv",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/BE"
+    "${workspaceFolder}/backend"
   ]
 }

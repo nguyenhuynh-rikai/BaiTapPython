@@ -20,15 +20,15 @@ services:
       - "6379:6379"
 
   web:
-    build: ./BE
+    build: ./backend
     container_name: housing_django_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./BE:/app
+      - ./backend:/app
     ports:
       - "8000:8000"
     env_file:
-      - ./BE/.env
+      - ./backend/.env
     environment:
       - DB_HOST=db
       - REDIS_URL=redis://redis:6379/1
@@ -37,13 +37,13 @@ services:
       - redis
 
   celery_worker:
-    build: ./BE
+    build: ./backend
     container_name: housing_celery_worker
     command: celery -A housing_project worker --loglevel=info
     volumes:
-      - ./BE:/app
+      - ./backend:/app
     env_file:
-      - ./BE/.env
+      - ./backend/.env
     environment:
       - DB_HOST=db
       - REDIS_URL=redis://redis:6379/1
