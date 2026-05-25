@@ -38,6 +38,10 @@ jobs:
       DB_HOST: localhost
       DB_PORT: 5432
       
+    defaults:
+      run:
+        working-directory: BE
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -47,6 +51,7 @@ jobs:
       with:
         python-version: '3.13'
         cache: 'pip' # Tự động cache các thư viện để chạy nhanh hơn ở lần sau
+        cache-dependency-path: 'BE/requirements.txt'
 
     - name: Install dependencies
       run: |
