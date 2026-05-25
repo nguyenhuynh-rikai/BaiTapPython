@@ -7,9 +7,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-housing_db}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
 
@@ -20,42 +20,32 @@ services:
       - "6379:6379"
 
   web:
-    build: .
+    build: ./BE
     container_name: housing_django_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./BE:/app
     ports:
       - "8000:8000"
+    env_file:
+      - ./BE/.env
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DJANGO_DEBUG=${DJANGO_DEBUG}
-      - DJANGO_ENV=${DJANGO_ENV}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
-      - DB_PORT=${DB_PORT}
       - REDIS_URL=redis://redis:6379/1
     depends_on:
       - db
       - redis
 
   celery_worker:
-    build: .
+    build: ./BE
     container_name: housing_celery_worker
     command: celery -A housing_project worker --loglevel=info
     volumes:
-      - .:/app
+      - ./BE:/app
+    env_file:
+      - ./BE/.env
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DJANGO_DEBUG=${DJANGO_DEBUG}
-      - DJANGO_ENV=${DJANGO_ENV}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
-      - DB_PORT=${DB_PORT}
       - REDIS_URL=redis://redis:6379/1
     depends_on:
       - db
