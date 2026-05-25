@@ -6,10 +6,8 @@ services:
     container_name: housing_postgres_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${DB_NAME:-housing_db}
-      - POSTGRES_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    env_file:
+      - ./backend/.env
     ports:
       - "5432:5432"
 
