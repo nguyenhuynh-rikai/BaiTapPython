@@ -73,4 +73,4 @@ jobs:
     steps:
     - name: Trigger Render Deploy Hook
       run: |
-        curl -f -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
