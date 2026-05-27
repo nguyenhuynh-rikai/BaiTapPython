@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, District, Ward, Amenity, Property, PropertyImage
+from .models import Category, District, Ward, Amenity, Property, PropertyImage, PropertyManager, ViewingAppointment
 
 # 1. Hiển thị ảnh ngay bên trong bài đăng phòng trọ (Inline)
 class PropertyImageInline(admin.TabularInline):
@@ -28,3 +28,10 @@ admin.site.register(Category)
 admin.site.register(District)
 admin.site.register(Ward)
 admin.site.register(Amenity)
+admin.site.register(ViewingAppointment)
+
+@admin.register(PropertyManager)
+class PropertyManagerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'property', 'landlord', 'created_at')
+    raw_id_fields = ('property', 'landlord')
+    search_fields = ('property__title', 'landlord__username')

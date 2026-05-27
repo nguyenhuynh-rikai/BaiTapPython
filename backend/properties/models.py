@@ -76,7 +76,7 @@ class Property(models.Model):
     in_comparisons: models.Manager[ComparisonList]
 
     def __str__(self):
-        return self.title
+        return f"[{self.id}] {self.title}"
 
 
 class PropertyImage(models.Model):
