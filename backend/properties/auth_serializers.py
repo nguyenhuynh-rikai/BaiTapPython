@@ -11,6 +11,7 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
     password_confirm = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -31,7 +32,15 @@ class RegisterSerializer(serializers.Serializer):
             username=validated_data["username"],
             email=validated_data.get("email", ""),
             password=validated_data["password"],
+            first_name=validated_data.get("first_name", ""),
         )
+
+        # Lưu vai trò (role) vào Django Group
+        role = self.initial_data.get("role", "tenant")
+        if role in ["tenant", "landlord", "admin"]:
+            from django.contrib.auth.models import Group
+            group, _ = Group.objects.get_or_create(name=role)
+            user.groups.add(group)
 
         return user
 
@@ -85,6 +94,6 @@ class ChangePasswordSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:  # type: ignore
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email", "date_joined"]
+        fields = ["id", "username", "first_name", "last_name", "date_joined"]
         read_only_fields = ["id", "username", "date_joined"]
 

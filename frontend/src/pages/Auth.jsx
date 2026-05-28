@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, Phone, User, ShieldCheck, LogIn } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function Auth({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,8 +16,8 @@ export default function Auth({ onLoginSuccess }) {
   const handlePhoneChange = (e) => {
     const val = e.target.value;
     setPhone(val);
-    if (val && !/^[0-9]{10}$/.test(val)) {
-      setPhoneError('Số điện thoại phải gồm đúng 10 số!');
+    if (val && val.length < 3) {
+      setPhoneError('Tên đăng nhập/SĐT phải dài tối thiểu 3 ký tự!');
     } else {
       setPhoneError('');
     }
@@ -32,24 +33,80 @@ export default function Auth({ onLoginSuccess }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (phoneError || passwordError || !phone || !password) {
       alert('Vui lòng điền đúng và đầy đủ các thông tin đăng nhập!');
       return;
     }
 
-    // Mock successful login/register
-    const mockUser = {
-      name: name || (role === 'landlord' ? 'Nguyễn Văn Hùng' : role === 'admin' ? 'Hồ Anh Admin' : 'Khách Thuê Trẻ'),
-      avatar: role === 'landlord' 
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' 
-        : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
-      role: role
-    };
+    try {
+      if (isLogin) {
+        // Đăng nhập thực tế tới Django REST qua /auth/login/
+        const data = await api.post('/auth/login/', {
+          username: phone,
+          password: password,
+        });
 
-    onLoginSuccess(mockUser, role);
-    alert(`Chào mừng ${mockUser.name} đã đăng nhập thành công vào TroTot!`);
+        const backendRole = data.user.role || 'tenant';
+        const finalRole = backendRole;
+
+        const loggedUser = {
+          id: data.user.id,
+          username: data.user.username,
+          role: finalRole, // Lưu vai trò thực tế từ database
+        };
+
+        // Lưu vào localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(loggedUser));
+
+        const userObjForApp = {
+          name: data.user.username,
+          avatar: finalRole === 'landlord' 
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' 
+            : finalRole === 'admin'
+              ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+              : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+          role: finalRole
+        };
+
+        onLoginSuccess(userObjForApp, finalRole);
+        alert(`Chào mừng ${data.user.username} đã đăng nhập thành công vào TroTot!`);
+      } else {
+        // Đăng ký thực tế tới Django REST qua /auth/register/ (Truyền thêm role)
+        const data = await api.post('/auth/register/', {
+          username: phone,
+          password: password,
+          password_confirm: password,
+          role: role,
+          first_name: name,
+        });
+
+        const loggedUser = {
+          id: data.user.id,
+          username: data.user.username,
+          role: role,
+        };
+
+        // Lưu vào localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(loggedUser));
+
+        const userObjForApp = {
+          name: data.user.username,
+          avatar: role === 'landlord' 
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' 
+            : 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+          role: role
+        };
+
+        onLoginSuccess(userObjForApp, role);
+        alert(`Tài khoản ${data.user.username} đã đăng ký và đăng nhập thành công với vai trò ${role === 'landlord' ? 'Chủ Cho Thuê' : 'Khách Thuê'}!`);
+      }
+    } catch (err) {
+      alert(`Đăng nhập thất bại: ${err.message}`);
+    }
   };
 
   return (
@@ -149,7 +206,7 @@ export default function Auth({ onLoginSuccess }) {
           )}
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-secondary)' }}>Số điện thoại *</label>
+            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-secondary)' }}>Tên đăng nhập / SĐT *</label>
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -158,10 +215,10 @@ export default function Auth({ onLoginSuccess }) {
               borderRadius: 'var(--radius-md)',
               padding: '10px 14px'
             }}>
-              <Phone size={16} style={{ color: 'var(--text-muted)', marginRight: '8px' }} />
+              <User size={16} style={{ color: 'var(--text-muted)', marginRight: '8px' }} />
               <input 
-                type="tel" 
-                placeholder="Nhập 10 số điện thoại"
+                type="text" 
+                placeholder="Nhập tên đăng nhập hoặc số điện thoại"
                 value={phone}
                 onChange={handlePhoneChange}
                 required
@@ -194,29 +251,64 @@ export default function Auth({ onLoginSuccess }) {
             {passwordError && <span style={{ fontSize: '10px', color: 'var(--danger)', marginTop: '4px', display: 'block', fontWeight: 600 }}>{passwordError}</span>}
           </div>
 
-          {/* Quick Role picker selection for demo */}
-          <div>
-            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-secondary)' }}>
-              Đăng nhập với vai trò kiểm thử:
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              style={{
-                width: '100%',
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 14px',
-                fontSize: '13px',
-                color: 'var(--text-primary)'
-              }}
-            >
-              <option value="tenant">Khách Thuê Phòng</option>
-              <option value="landlord">Chủ Nhà Cho Thuê</option>
-              <option value="admin">Quản Trị Viên (Admin)</option>
-            </select>
-          </div>
+          {!isLogin && (
+            <div style={{ margin: '14px 0' }}>
+              <label style={{ fontSize: '11px', fontWeight: 800, display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                Vai trò của bạn *
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                
+                {/* Thẻ Khách Thuê */}
+                <div 
+                  onClick={() => setRole('tenant')}
+                  style={{
+                    padding: '12px 10px',
+                    borderRadius: 'var(--radius-md)',
+                    border: `2px solid ${role === 'tenant' ? '#3b82f6' : 'var(--border)'}`,
+                    background: role === 'tenant' ? 'rgba(59, 130, 246, 0.05)' : 'var(--bg-primary)',
+                    boxShadow: role === 'tenant' ? '0 4px 10px rgba(59, 130, 246, 0.06)' : 'none',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'var(--transition)'
+                  }}
+                  className="hover-lift"
+                >
+                  <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>🙋‍♂️</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: role === 'tenant' ? '#3b82f6' : 'var(--text-primary)' }}>
+                    Khách Thuê
+                  </span>
+                  <p style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.2' }}>
+                    Tìm & thuê phòng
+                  </p>
+                </div>
+
+                {/* Thẻ Chủ Cho Thuê */}
+                <div 
+                  onClick={() => setRole('landlord')}
+                  style={{
+                    padding: '12px 10px',
+                    borderRadius: 'var(--radius-md)',
+                    border: `2px solid ${role === 'landlord' ? '#10b981' : 'var(--border)'}`,
+                    background: role === 'landlord' ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-primary)',
+                    boxShadow: role === 'landlord' ? '0 4px 10px rgba(16, 185, 129, 0.06)' : 'none',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'var(--transition)'
+                  }}
+                  className="hover-lift"
+                >
+                  <span style={{ fontSize: '20px', display: 'block', marginBottom: '4px' }}>🏡</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: role === 'landlord' ? '#10b981' : 'var(--text-primary)' }}>
+                    Chủ Cho Thuê
+                  </span>
+                  <p style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.2' }}>
+                    Đăng tin & quản lý
+                  </p>
+                </div>
+                
+              </div>
+            </div>
+          )}
 
           {/* CTA Submit Button */}
           <button

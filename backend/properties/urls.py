@@ -12,7 +12,15 @@ from .views import (
     ViewingAppointmentViewSet,
     ComparisonViewSet,
 )
-from .auth_views import ChangePasswordAPIView, LoginAPIView, LogoutAPIView, RegisterAPIView, UserProfileAPIView
+from .auth_views import (
+    ChangePasswordAPIView,
+    LoginAPIView,
+    LogoutAPIView,
+    RegisterAPIView,
+    UserProfileAPIView,
+    AdminUserListView,
+    AdminUserDetailView,
+)
 from .task_views import ImportPropertiesTaskAPIView, TaskDetailAPIView, TaskListAPIView
 
 
@@ -35,6 +43,8 @@ urlpatterns = [
     path("auth/profile/", UserProfileAPIView.as_view()),
     path("auth/change-password/", ChangePasswordAPIView.as_view()),
     path("auth/logout/", LogoutAPIView.as_view()),
+    path("admin/users/", AdminUserListView.as_view()),
+    path("admin/users/<int:pk>/", AdminUserDetailView.as_view()),
     path("tasks/import-properties/", ImportPropertiesTaskAPIView.as_view()),
     path("tasks/", TaskListAPIView.as_view()),
     path("tasks/<str:task_id>/", TaskDetailAPIView.as_view()),

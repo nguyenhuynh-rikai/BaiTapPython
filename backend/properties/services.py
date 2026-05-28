@@ -76,6 +76,23 @@ def is_valid_property_data(title, source_url, price, area):
     if area is None:
         return False
 
+    # Lọc bỏ các bài đăng loại "Cần thuê" / "Cần tìm" làm loạn dữ liệu phòng trọ cho thuê
+    title_lower = str(title).lower()
+    keywords = [
+        "cần thuê", "can thue",
+        "cần tìm", "can tim",
+        "tìm trọ", "tim tro",
+        "tìm phòng", "tim phong",
+        "muốn thuê", "muon thue",
+        "muốn tìm", "muon tim",
+        "kiếm trọ", "kiem tro",
+        "kiếm phòng", "kiem phong",
+        "tìm nhà", "tim nha",
+        "cần kiếm", "can kiem"
+    ]
+    if any(kw in title_lower for kw in keywords):
+        return False
+
     return True
 
 

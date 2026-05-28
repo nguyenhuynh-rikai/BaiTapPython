@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Heart, Search, Map, List, Compass, Star, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Heart, Search, Map, List, Compass, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { mockCategories } from '../data/mockData';
 
 export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite }) {
@@ -9,19 +9,67 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
   const [showMap, setShowMap] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
+  // State quản lý phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 15; // Hiển thị 16 phòng trọ trên một trang (4 dòng x 4 phòng)
+
   // Lọc phòng trọ theo category, search, và giá
   const filteredRooms = rooms.filter(room => {
     const matchesCategory = selectedCategory === 'all' || room.category === selectedCategory;
-    const matchesSearch = room.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          room.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = room.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      room.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPrice = room.price <= maxPrice;
     const isApproved = room.status === 'approved'; // Chỉ hiển thị tin đã duyệt
     return matchesCategory && matchesSearch && matchesPrice && isApproved;
   });
 
+  // Tự động quay về trang 1 khi thay đổi các bộ lọc/từ khóa tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, maxPrice]);
+
+  // Phân mảnh danh sách phòng trọ theo trang hiện tại
+  const totalItems = filteredRooms.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const displayedRooms = filteredRooms.slice(startIndex, endIndex);
+
+  // Thuật toán tạo dải phân trang rút gọn thông minh (Ellipsis Pagination) dạng 1, 2, 3, 4 ... 50
+  const getPaginationRange = () => {
+    const delta = 1; // Số lượng trang hiển thị xung quanh trang hiện tại
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    range.push(1);
+    for (let i = currentPage - delta; i <= currentPage + delta; i++) {
+      if (i < totalPages && i > 1) {
+        range.push(i);
+      }
+    }
+    if (totalPages > 1) {
+      range.push(totalPages);
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l > 2) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
   return (
     <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      
+
       {/* Hero Banner Section */}
       <section style={{
         background: 'linear-gradient(135deg, var(--primary) 0%, #818cf8 100%)',
@@ -75,9 +123,9 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
         }}>
           <div style={{ display: 'flex', alignItems: 'center', flex: 1, paddingLeft: '16px' }}>
             <Search size={18} style={{ color: 'var(--primary)', marginRight: '8px' }} />
-            <input 
-              type="text" 
-              placeholder="Bạn muốn tìm quanh Đại học nào?" 
+            <input
+              type="text"
+              placeholder="Bạn muốn tìm quanh Đại học nào?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -106,7 +154,7 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
 
       {/* Categories & Main Filters row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        
+
         {/* Badges categories filter */}
         <div style={{
           display: 'flex',
@@ -141,9 +189,9 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
 
         {/* Filter Slider & Map buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          
+
           {/* Price quick filter button */}
-          <button 
+          <button
             onClick={() => setShowFilterDrawer(!showFilterDrawer)}
             style={{
               display: 'flex',
@@ -164,7 +212,7 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
           </button>
 
           {/* Toggle Map View button */}
-          <button 
+          <button
             onClick={() => setShowMap(!showMap)}
             style={{
               display: 'flex',
@@ -201,10 +249,10 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
               {(maxPrice / 1000000).toFixed(1)} triệu VNĐ
             </span>
           </div>
-          <input 
-            type="range" 
-            min="1000000" 
-            max="10000000" 
+          <input
+            type="range"
+            min="1000000"
+            max="10000000"
             step="500000"
             value={maxPrice}
             onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -230,7 +278,7 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
         gap: '24px',
         transition: 'var(--transition)'
       }}>
-        
+
         {/* Grid List Rooms */}
         <div>
           {filteredRooms.length === 0 ? (
@@ -240,131 +288,234 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Hãy thử điều chỉnh lại bộ lọc giá hoặc từ khóa tìm kiếm nhé.</p>
             </div>
           ) : (
-            <div className="grid-responsive">
-              {filteredRooms.map(room => {
-                const isFav = favorites.includes(room.id);
-                return (
-                  <div 
-                    key={room.id} 
-                    className="hover-lift"
-                    style={{
-                      background: 'var(--bg-secondary)',
-                      borderRadius: 'var(--radius-lg)',
-                      overflow: 'hidden',
-                      boxShadow: 'var(--shadow-md)',
-                      border: '1px solid var(--border)',
-                      position: 'relative',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%'
-                    }}
-                  >
-                    {/* Favorite Button */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleFavorite(room.id);
-                      }}
+            <>
+              <div className="grid-responsive">
+                {displayedRooms.map(room => {
+                  const isFav = favorites.includes(room.id);
+                  return (
+                    <div
+                      key={room.id}
+                      className="hover-lift"
                       style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        zIndex: 10,
-                        background: 'rgba(255,255,255,0.85)',
-                        border: 'none',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-md)',
+                        border: '1px solid var(--border)',
+                        position: 'relative',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                        color: isFav ? 'var(--secondary)' : 'var(--text-secondary)',
-                        transition: 'var(--transition-bounce)'
+                        flexDirection: 'column',
+                        height: '100%'
                       }}
                     >
-                      <Heart size={16} fill={isFav ? 'var(--secondary)' : 'none'} style={{ transform: isFav ? 'scale(1.15)' : 'scale(1)' }} />
-                    </button>
+                      {/* Favorite Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFavorite(room.id);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          zIndex: 10,
+                          background: 'rgba(255,255,255,0.85)',
+                          border: 'none',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                          color: isFav ? 'var(--secondary)' : 'var(--text-secondary)',
+                          transition: 'var(--transition-bounce)'
+                        }}
+                      >
+                        <Heart size={16} fill={isFav ? 'var(--secondary)' : 'none'} style={{ transform: isFav ? 'scale(1.15)' : 'scale(1)' }} />
+                      </button>
 
-                    {/* Room Image */}
-                    <div 
-                      onClick={() => onSelectRoom(room)}
-                      style={{ height: '180px', overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
-                    >
-                      <img 
-                        src={room.images[0]} 
-                        alt={room.title} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} 
-                        className="room-img"
-                      />
-                      <span className="badge badge-primary" style={{
-                        position: 'absolute',
-                        bottom: '12px',
-                        left: '12px',
-                        background: 'rgba(99, 102, 241, 0.95)',
-                        color: '#fff',
-                        fontWeight: 700,
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                      }}>
-                        {room.category === 'shared' ? 'KTX' : room.category === 'studio' ? 'Studio' : room.category === 'apartment' ? 'Chung cư' : 'Phòng trọ'}
-                      </span>
-                    </div>
-
-                    {/* Room Details Info */}
-                    <div 
-                      onClick={() => onSelectRoom(room)}
-                      style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1, cursor: 'pointer' }}
-                    >
-                      {/* Dist and Rating */}
-                      <div className="flex-between" style={{ marginBottom: '6px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)' }}>
-                          {room.distance}
+                      {/* Room Image */}
+                      <div
+                        onClick={() => onSelectRoom(room)}
+                        style={{ height: '180px', overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
+                      >
+                        <img
+                          src={room.images[0]}
+                          alt={room.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                          className="room-img"
+                        />
+                        <span className="badge badge-primary" style={{
+                          position: 'absolute',
+                          bottom: '12px',
+                          left: '12px',
+                          background: 'rgba(99, 102, 241, 0.95)',
+                          color: '#fff',
+                          fontWeight: 700,
+                          boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                        }}>
+                          {room.category === 'shared' ? 'KTX' : room.category === 'studio' ? 'Studio' : room.category === 'apartment' ? 'Chung cư' : 'Phòng trọ'}
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                          <Star size={12} fill="var(--amber)" stroke="var(--amber)" />
-                          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{room.rating}</span>
+                      </div>
+
+                      {/* Room Details Info */}
+                      <div
+                        onClick={() => onSelectRoom(room)}
+                        style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1, cursor: 'pointer' }}
+                      >
+                        {/* Khoảng cách */}
+                        <div style={{ marginBottom: '6px', textAlign: 'left' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)' }}>
+                            {room.distance}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h4 style={{
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          color: 'var(--text-primary)',
+                          marginBottom: '8px',
+                          lineHeight: '1.4',
+                          height: '40px',
+                          overflow: 'hidden',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}>
+                          {room.title}
+                        </h4>
+
+                        {/* Location */}
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                          {room.location}
+                        </p>
+
+                        {/* Divider */}
+                        <div style={{ borderTop: '1px solid var(--border)', margin: 'auto 0 12px 0' }} />
+
+                        {/* Price & Area */}
+                        <div className="flex-between">
+                          <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--secondary)' }}>
+                            {room.priceStr}
+                          </span>
+                          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
+                            Diện tích: {room.area} m²
+                          </span>
                         </div>
                       </div>
-
-                      {/* Title */}
-                      <h4 style={{
-                        fontSize: '14px',
-                        fontWeight: 700,
-                        color: 'var(--text-primary)',
-                        marginBottom: '8px',
-                        lineHeight: '1.4',
-                        height: '40px',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
-                        {room.title}
-                      </h4>
-
-                      {/* Location */}
-                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                        {room.location}
-                      </p>
-
-                      {/* Divider */}
-                      <div style={{ borderTop: '1px solid var(--border)', margin: 'auto 0 12px 0' }} />
-
-                      {/* Price & Area */}
-                      <div className="flex-between">
-                        <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--secondary)' }}>
-                          {room.priceStr}
-                        </span>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
-                          Diện tích: {room.area} m²
-                        </span>
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Bộ Điều Hướng Phân Trang (Pagination Controls) */}
+              {totalPages > 1 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginTop: '32px',
+                  marginBottom: '8px'
+                }}>
+                  {/* Nút Trước (Prev) */}
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-secondary)',
+                      color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-secondary)',
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      transition: 'var(--transition)',
+                      opacity: currentPage === 1 ? 0.5 : 1
+                    }}
+                    className={currentPage === 1 ? "" : "hover-lift"}
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  {/* Các Nút Số Trang rút gọn thông minh */}
+                  {getPaginationRange().map((page, idx) => {
+                    if (page === '...') {
+                      return (
+                        <span
+                          key={`dots-${idx}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '36px',
+                            height: '36px',
+                            color: 'var(--text-muted)',
+                            fontWeight: 700,
+                            fontSize: '14px'
+                          }}
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    const isActive = currentPage === page;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          border: `1px solid ${isActive ? 'var(--primary)' : 'var(--border)'}`,
+                          background: isActive ? 'var(--primary)' : 'var(--bg-secondary)',
+                          color: isActive ? '#fff' : 'var(--text-secondary)',
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          transition: 'var(--transition)',
+                          boxShadow: isActive ? '0 4px 10px rgba(99, 102, 241, 0.2)' : 'none'
+                        }}
+                        className="hover-lift"
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  {/* Nút Sau (Next) */}
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-secondary)',
+                      color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-secondary)',
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      transition: 'var(--transition)',
+                      opacity: currentPage === totalPages ? 0.5 : 1
+                    }}
+                    className={currentPage === totalPages ? "" : "hover-lift"}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -403,7 +554,7 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
               justifyContent: 'center',
               overflow: 'hidden'
             }}>
-              
+
               {/* Central Map graphics simulation */}
               <div style={{
                 position: 'absolute',
@@ -483,7 +634,7 @@ export default function Home({ rooms, onSelectRoom, favorites, onToggleFavorite 
         )}
 
       </div>
-      
+
       {/* Visual Design Decisions & UX notes for user review */}
       <section style={{
         marginTop: '40px',

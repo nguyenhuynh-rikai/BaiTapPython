@@ -66,37 +66,6 @@ export default function Navbar({ currentRole, onChangeRole, onNavigate, currentP
 
         {/* Dynamic Nav & Role Switcher */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          
-          {/* Interactive Role Switcher */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'var(--primary-light)',
-            padding: '4px 12px',
-            borderRadius: '9999px',
-            border: '1px dashed var(--primary)'
-          }}>
-            <Layers size={14} style={{ color: 'var(--primary)' }} />
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary)', marginRight: '4px' }}>Vai trò:</span>
-            <select 
-              value={currentRole} 
-              onChange={(e) => onChangeRole(e.target.value)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--primary)',
-                fontWeight: 700,
-                fontSize: '12px',
-                cursor: 'pointer',
-                outline: 'none'
-              }}
-            >
-              <option value="tenant">Khách thuê</option>
-              <option value="landlord">Chủ nhà</option>
-              <option value="admin">Quản trị viên</option>
-            </select>
-          </div>
 
           {/* Quick Icons */}
           <button 

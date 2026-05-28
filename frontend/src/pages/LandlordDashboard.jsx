@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Eye, MessageSquare, BarChart3, Upload, MapPin, Grid, ArrowLeft, ArrowRight, ShieldCheck, ClipboardList } from 'lucide-react';
+import { Plus, Eye, MessageSquare, Upload, MapPin, Grid, ArrowLeft, ArrowRight, ShieldCheck, ClipboardList } from 'lucide-react';
+import { api } from '../utils/api';
 
 export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -14,6 +15,23 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
   const [location, setLocation] = useState('');
   const [distance, setDistance] = useState('');
   const [amenities, setAmenities] = useState([]);
+
+  // States quản lý việc tải ảnh lên (Kéo & Thả) thực tế
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Hàm xử lý file ảnh khi chọn hoặc kéo thả
+  const handleFiles = (files) => {
+    Array.from(files).forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setUploadedImages(prev => [...prev, e.target.result]);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
 
   // Checkbox amenities handling
   const availableAmenities = [
@@ -30,55 +48,47 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
     }
   };
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!title || !price || !location) {
       alert('Vui lòng điền đầy đủ các thông tin cốt lõi!');
       return;
     }
 
-    const priceNum = Number(price);
-    const newRoom = {
-      id: Date.now(),
-      title,
-      category,
-      price: priceNum,
-      priceStr: `${(priceNum / 1000000).toFixed(1)} tr/tháng`,
-      area: Number(area) || 20,
-      location,
-      distance: distance || 'Cách ĐH lân cận 500m',
-      rating: 5.0,
-      reviewsCount: 0,
-      images: [
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80'
-      ],
-      amenities,
-      landlord: {
-        name: 'Nguyễn Văn Hùng',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        phone: '0987654321',
-        responseRate: '98%',
-        isVerified: true
-      },
-      description,
-      status: 'pending' // Chờ duyệt khi mới tạo
-    };
+    try {
+      const priceNum = Number(price);
 
-    onAddRoom(newRoom);
-    
-    // Reset form states
-    setTitle('');
-    setPrice('');
-    setArea('');
-    setDescription('');
-    setLocation('');
-    setDistance('');
-    setAmenities([]);
-    
-    // Reset views
-    setShowAddForm(false);
-    setFormStep(1);
-    alert('Đăng bài thành công! Bài đăng đang ở trạng thái "Chờ duyệt" bởi Admin.');
+      // Gửi bài đăng phòng trọ mới thật lên Django Backend API
+      await api.post('/properties/', {
+        title: title,
+        description: description || 'Không có mô tả',
+        price: priceNum,
+        area: Number(area) || 20,
+        address: location,
+        category: 1, // Mặc định ID 1 là "Phong tro"
+        source_name: 'TroTot User',
+        source_url: `https://trotot.com/rooms/${Date.now()}`
+      });
+
+      onAddRoom(); // Callback tải lại DB từ App.jsx
+      
+      // Reset form states
+      setTitle('');
+      setPrice('');
+      setArea('');
+      setDescription('');
+      setLocation('');
+      setDistance('');
+      setAmenities([]);
+      setUploadedImages([]);
+      
+      // Reset views
+      setShowAddForm(false);
+      setFormStep(1);
+      alert('Đăng bài thành công! Bài đăng đã được lưu vào PostgreSQL và đang ở trạng thái "Chờ duyệt" bởi Admin.');
+    } catch (err) {
+      alert(`Đăng tin thất bại: ${err.message}`);
+    }
   };
 
   return (
@@ -88,7 +98,7 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
       <div className="flex-between" style={{ marginBottom: '24px' }}>
         <div>
           <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Bảng quản lý của Chủ nhà</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Cập nhật tình trạng phòng và kiểm tra chỉ số kinh doanh</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Cập nhật tình trạng phòng và kiểm tra các cuộc liên hệ</p>
         </div>
         
         {!showAddForm && (
@@ -119,7 +129,7 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
           {/* Analytics quick metrics */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '16px',
             marginBottom: '32px'
           }}>
@@ -139,15 +149,6 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: 800 }}>12 cuộc</h3>
               <span style={{ fontSize: '10px', color: 'var(--primary)', fontWeight: 700 }}>Thời gian phản hồi ~3 phút</span>
-            </div>
-
-            <div className="glass-panel" style={{ padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
-              <div className="flex-between" style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700 }}>Ước tính doanh thu</span>
-                <BarChart3 size={18} style={{ color: 'var(--amber)' }} />
-              </div>
-              <h3 style={{ fontSize: '24px', fontWeight: 800 }}>9.8 Tr/tháng</h3>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>Tỷ lệ lấp đầy: 75%</span>
             </div>
           </div>
 
@@ -397,18 +398,100 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
 
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 700, display: 'block', marginBottom: '8px' }}>Hình ảnh thực tế căn phòng</label>
-                  <div style={{
-                    border: '2px dashed var(--border)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '30px 20px',
-                    textAlign: 'center',
-                    background: 'var(--bg-primary)',
-                    cursor: 'pointer'
-                  }}>
-                    <Upload size={32} style={{ color: 'var(--text-muted)', marginBottom: '8px' }} />
-                    <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Kéo thả hoặc Nhấp để tải ảnh lên</p>
+                  
+                  {/* File input ẩn */}
+                  <input 
+                    type="file" 
+                    id="fileInput" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={(e) => handleFiles(e.target.files)}
+                    style={{ display: 'none' }}
+                  />
+
+                  {/* Vùng kéo thả ảnh tương tác */}
+                  <div 
+                    onClick={() => document.getElementById('fileInput').click()}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}
+                    style={{
+                      border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border)'}`,
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '30px 20px',
+                      textAlign: 'center',
+                      background: isDragging ? 'rgba(99, 102, 241, 0.05)' : 'var(--bg-primary)',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
+                    }}
+                    className="hover-lift"
+                  >
+                    <Upload size={32} style={{ color: isDragging ? 'var(--primary)' : 'var(--text-muted)', marginBottom: '8px', transition: 'var(--transition)' }} />
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: isDragging ? 'var(--primary)' : 'var(--text-primary)', transition: 'var(--transition)' }}>
+                      {isDragging ? 'Thả hình ảnh vào đây ngay! ✨' : 'Kéo thả hoặc Nhấp để tải ảnh lên'}
+                    </p>
                     <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Hỗ trợ định dạng JPG, PNG tối đa 5MB</p>
                   </div>
+
+                  {/* Lưới hình ảnh Preview có nút xóa nhanh */}
+                  {uploadedImages.length > 0 && (
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+                      gap: '10px',
+                      marginTop: '16px',
+                      animation: 'fadeIn 0.3s ease-out'
+                    }}>
+                      {uploadedImages.map((imgUrl, index) => (
+                        <div 
+                          key={index}
+                          style={{
+                            position: 'relative',
+                            width: '100%',
+                            height: '80px',
+                            borderRadius: 'var(--radius-md)',
+                            overflow: 'hidden',
+                            border: '1px solid var(--border)',
+                            boxShadow: 'var(--shadow-sm)'
+                          }}
+                        >
+                          <img 
+                            src={imgUrl} 
+                            alt={`Preview ${index}`} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                          {/* Nút Xóa ảnh nhanh */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUploadedImages(prev => prev.filter((_, i) => i !== index));
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: '4px',
+                              right: '4px',
+                              background: 'rgba(239, 68, 68, 0.85)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '18px',
+                              height: '18px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              cursor: 'pointer',
+                              fontWeight: 'bold',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -511,7 +594,19 @@ export default function LandlordDashboard({ rooms, landlordRooms, onAddRoom }) {
               {formStep < 3 ? (
                 <button
                   type="button"
-                  onClick={() => setFormStep(formStep + 1)}
+                  onClick={() => {
+                    if (formStep === 1) {
+                      if (!title.trim()) {
+                        alert('Vui lòng điền Tiêu đề tin đăng phòng trọ ở Bước 1!');
+                        return;
+                      }
+                      if (!price || Number(price) <= 0) {
+                        alert('Vui lòng điền Giá thuê hợp lệ (lớn hơn 0) ở Bước 1!');
+                        return;
+                      }
+                    }
+                    setFormStep(formStep + 1);
+                  }}
                   style={{
                     padding: '8px 16px',
                     borderRadius: '8px',

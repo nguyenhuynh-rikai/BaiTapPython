@@ -1,13 +1,147 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Star, Heart, MapPin, Share2, ShieldCheck, UserCheck, MessageSquare, Phone, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Heart, MapPin, Share2, ShieldCheck, UserCheck, MessageSquare, Phone, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, onStartChat }) {
-  const isFav = favorites.includes(room.id);
-  const [activeTab, setActiveTab] = useState('gallery');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const isFav = favorites ? favorites.includes(room.id) : false;
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
       
+      {/* Lightbox Modal xem ảnh toàn màn hình cao cấp */}
+      {lightboxOpen && (
+        <div 
+          onClick={() => setLightboxOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(15, 23, 42, 0.95)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            animation: 'fadeIn 0.25s ease-out'
+          }}
+        >
+          {/* Nút Đóng Lightbox */}
+          <button 
+            onClick={() => setLightboxOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              cursor: 'pointer',
+              transition: 'var(--transition)'
+            }}
+            className="hover-lift"
+          >
+            <X size={22} />
+          </button>
+
+          {/* Vùng hiển thị ảnh và phím điều hướng */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '90%',
+              maxWidth: '900px',
+              height: '75vh'
+            }}
+          >
+            {/* Nút Trái */}
+            {room.images.length > 1 && (
+              <button 
+                onClick={() => setLightboxIndex((prev) => (prev - 1 + room.images.length) % room.images.length)}
+                style={{
+                  position: 'absolute',
+                  left: window.innerWidth < 768 ? '10px' : '-60px',
+                  background: 'rgba(255,255,255,0.15)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '44px',
+                  height: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  zIndex: 20
+                }}
+                className="hover-lift"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            {/* Ảnh Phóng To Sắc Nét */}
+            <img 
+              src={room.images[lightboxIndex]} 
+              alt="Lightbox View" 
+              style={{
+                maxHeight: '100%',
+                maxWidth: '100%',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.6)'
+              }}
+            />
+
+            {/* Nút Phải */}
+            {room.images.length > 1 && (
+              <button 
+                onClick={() => setLightboxIndex((prev) => (prev + 1) % room.images.length)}
+                style={{
+                  position: 'absolute',
+                  right: window.innerWidth < 768 ? '10px' : '-60px',
+                  background: 'rgba(255,255,255,0.15)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '44px',
+                  height: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  zIndex: 20
+                }}
+                className="hover-lift"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+          </div>
+
+          {/* Chỉ số đếm ảnh dưới đáy */}
+          <div style={{
+            color: '#fff',
+            marginTop: '20px',
+            fontSize: '13px',
+            fontWeight: 700,
+            background: 'rgba(255,255,255,0.1)',
+            padding: '6px 16px',
+            borderRadius: '20px',
+            letterSpacing: '0.5px'
+          }}>
+            Hình ảnh {lightboxIndex + 1} / {room.images.length}
+          </div>
+        </div>
+      )}
+
       {/* Detail Header / Sticky navigation */}
       <div style={{
         display: 'flex',
@@ -86,28 +220,43 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
         boxShadow: 'var(--shadow-md)'
       }}>
         {/* Main large image */}
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <div 
+          onClick={() => { setLightboxIndex(0); setLightboxOpen(true); }}
+          style={{ position: 'relative', overflow: 'hidden', background: '#0f172a', cursor: 'pointer' }}
+          title="Click để phóng to xem chi tiết ảnh phòng"
+        >
           <img 
             src={room.images[0]} 
             alt={room.title} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 0.3s ease' }}
+            className="room-img-hover"
           />
         </div>
 
         {/* Column of secondary images */}
         <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '12px' }}>
-          <div style={{ overflow: 'hidden' }}>
+          <div 
+            onClick={() => { setLightboxIndex(1 % room.images.length); setLightboxOpen(true); }}
+            style={{ overflow: 'hidden', background: '#0f172a', cursor: 'pointer' }}
+            title="Click để phóng to xem chi tiết ảnh phòng"
+          >
             <img 
               src={room.images[1] || room.images[0]} 
               alt="Secondary image" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 0.3s ease' }}
+              className="room-img-hover"
             />
           </div>
-          <div style={{ overflow: 'hidden', position: 'relative' }}>
+          <div 
+            onClick={() => { setLightboxIndex(0); setLightboxOpen(true); }}
+            style={{ overflow: 'hidden', position: 'relative', background: '#0f172a', cursor: 'pointer' }}
+            title="Click để xem tất cả ảnh phòng"
+          >
             <img 
               src={room.images[0]} 
               alt="Third image" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'brightness(0.65)', transition: 'transform 0.3s ease' }}
+              className="room-img-hover"
             />
             <div style={{
               position: 'absolute',
@@ -116,10 +265,11 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
               alignItems: 'center',
               justifyContent: 'center',
               color: '#fff',
-              fontSize: '14px',
-              fontWeight: 800
+              fontSize: '13px',
+              fontWeight: 800,
+              background: 'rgba(0,0,0,0.2)'
             }}>
-              + Xem thêm ảnh
+              🔍 Click phóng to ảnh
             </div>
           </div>
         </div>
@@ -140,10 +290,6 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
               <span className="badge badge-primary" style={{ fontWeight: 800 }}>
                 {room.category === 'studio' ? 'Studio dịch vụ' : room.category === 'shared' ? 'Ký túc xá homestay' : 'Phòng trọ khép kín'}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '13px', fontWeight: 700 }}>
-                <Star size={13} fill="var(--amber)" stroke="var(--amber)" />
-                <span>{room.rating} ({room.reviewsCount} Đánh giá)</span>
               </span>
             </div>
 

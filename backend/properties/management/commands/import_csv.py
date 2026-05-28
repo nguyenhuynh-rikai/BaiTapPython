@@ -4,6 +4,24 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from properties.models import Property, District, Ward, Category
 
+def is_demand_side_post(title):
+    if not title:
+        return False
+    title_lower = str(title).lower()
+    keywords = [
+        "cần thuê", "can thue",
+        "cần tìm", "can tim",
+        "tìm trọ", "tim tro",
+        "tìm phòng", "tim phong",
+        "muốn thuê", "muon thue",
+        "muốn tìm", "muon tim",
+        "kiếm trọ", "kiem tro",
+        "kiếm phòng", "kiem phong",
+        "tìm nhà", "tim nha",
+        "cần kiếm", "can kiem"
+    ]
+    return any(kw in title_lower for kw in keywords)
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -22,6 +40,27 @@ class Command(BaseCommand):
             return
 
         try:
+            # 1. Dọn dẹp dữ liệu cũ bị lỗi trong DB
+            keywords = [
+                "cần thuê", "can thue",
+                "cần tìm", "can tim",
+                "tìm trọ", "tim tro",
+                "tìm phòng", "tim phong",
+                "muốn thuê", "muon thue",
+                "muốn tìm", "muon tim",
+                "kiếm trọ", "kiem tro",
+                "kiếm phòng", "kiem phong",
+                "tìm nhà", "tim nha",
+                "cần kiếm", "can kiem"
+            ]
+            from django.db.models import Q
+            query = Q()
+            for kw in keywords:
+                query |= Q(title__icontains=kw)
+            deleted_count, _ = Property.objects.filter(query).delete()
+            if deleted_count > 0:
+                self.stdout.write(self.style.SUCCESS(f"Đã dọn dẹp {deleted_count} bài đăng cũ loại 'cần thuê/tìm trọ' khỏi cơ sở dữ liệu."))
+
             # Đọc file CSV
             df = pd.read_csv(full_path)
             self.stdout.write(self.style.SUCCESS(f"Đã đọc file. Đang xử lý {len(df)} dòng..."))
@@ -30,25 +69,29 @@ class Command(BaseCommand):
             category, _ = Category.objects.get_or_create(name="Phòng trọ", slug="phong-tro")
 
             count = 0
+            skipped_demand = 0
             for _, row in df.iterrows():
                 try:
-                    # 1. Khớp nối Quận/Phường
+                    title = row.get('title', 'Không có tiêu đề')
+                    if is_demand_side_post(title):
+                        skipped_demand += 1
+                        continue
+
+                    # Khớp nối Quận/Phường
                     district_name = str(row.get('district', 'Chưa rõ')).strip()
                     district, _ = District.objects.get_or_create(name=district_name)
 
                     ward_name = str(row.get('ward', 'Chưa rõ')).strip()
                     ward, _ = Ward.objects.get_or_create(name=ward_name, district=district)
 
-                    # 2. Khớp nối dữ liệu từ CSV vào Model Property
-                    # Lưu ý: Tên cột bên trái (ví dụ: source_url) là của Django Model
-                    # Tên trong ngoặc row['...'] là tên cột bạn vừa gửi
+                    # Khớp nối dữ liệu từ CSV vào Model Property
                     Property.objects.update_or_create(
-                        source_url=row['url'], # Map 'url' trong CSV vào 'source_url' trong DB
+                        source_url=row['url'],
                         defaults={
-                            'title': row.get('title', 'Không có tiêu đề'),
+                            'title': title,
                             'description': row.get('description', ''),
-                            'price': row.get('price_vnd', 0), # Map 'price_vnd'
-                            'area': row.get('area_m2', 0),    # Map 'area_m2'
+                            'price': row.get('price_vnd', 0),
+                            'area': row.get('area_m2', 0),
                             'price_per_m2': row.get('price_per_m2'),
                             'address': row.get('address', ''),
                             'district': district,
@@ -63,7 +106,7 @@ class Command(BaseCommand):
                 except Exception as row_e:
                     self.stdout.write(self.style.WARNING(f"Bỏ qua 1 dòng do lỗi: {row_e}"))
 
-            self.stdout.write(self.style.SUCCESS(f"Thành công! Đã nạp {count} bài đăng vào PostgreSQL."))
+            self.stdout.write(self.style.SUCCESS(f"Thành công! Đã nạp {count} bài đăng vào PostgreSQL (Bỏ qua {skipped_demand} bài tìm trọ)."))
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Lỗi hệ thống: {e}"))

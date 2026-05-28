@@ -1,12 +1,50 @@
 import React, { useState } from 'react';
 import { Send, MapPin, Check, CheckCheck, Smile, HelpCircle, PhoneCall, Calendar } from 'lucide-react';
-import { mockChats } from '../data/mockData';
 
-export default function Chat({ activeChatId, onBackToRooms, initialChats = mockChats }) {
-  const [chats, setChats] = useState(initialChats);
-  const [selectedChatId, setSelectedChatId] = useState(activeChatId || chats[0].id);
+export default function Chat({ activeChatId, onBackToRooms, chats = [], onUpdateChats }) {
   const [inputText, setInputText] = useState('');
 
+  if (chats.length === 0) {
+    return (
+      <div style={{
+        animation: 'fadeIn 0.4s ease-out',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '60px 20px',
+        height: 'calc(100vh - 120px)',
+        background: 'var(--bg-secondary)',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border)',
+        textAlign: 'center',
+        boxShadow: 'var(--shadow-lg)'
+      }}>
+        <div style={{ fontSize: '56px', marginBottom: '16px' }}>✉️</div>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Hộp thư của bạn trống</h3>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 20px auto', lineHeight: '1.5' }}>
+          Bạn chưa bắt đầu cuộc hội thoại nào. Hãy quay lại trang chủ và bấm **'Gửi tin nhắn thương lượng'** tại trang chi tiết phòng trọ để liên hệ với chủ trọ nhé!
+        </p>
+        <button
+          onClick={onBackToRooms}
+          style={{
+            background: 'var(--primary)',
+            color: '#fff',
+            padding: '10px 24px',
+            borderRadius: '9999px',
+            fontWeight: 700,
+            fontSize: '13px',
+            boxShadow: '0 4px 10px rgba(99, 102, 241, 0.2)'
+          }}
+          className="hover-lift"
+        >
+          Khám phá phòng trọ ngay
+        </button>
+      </div>
+    );
+  }
+
+  const [selectedChatId, setSelectedChatId] = useState(activeChatId || chats[0]?.id);
   const activeChat = chats.find(c => c.id === selectedChatId) || chats[0];
 
   // Các tin nhắn gợi ý phản hồi nhanh (Quick Replies)
@@ -28,7 +66,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
       time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Cập nhật mảng chat
+    // Cập nhật mảng chat của App.jsx thông qua callback
     const updatedChats = chats.map(chat => {
       if (chat.id === selectedChatId) {
         return {
@@ -39,7 +77,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
       return chat;
     });
 
-    setChats(updatedChats);
+    onUpdateChats(updatedChats);
     setInputText('');
 
     // Giả lập bot phản hồi tự động của chủ nhà sau 1.5 giây để cuộc chat sống động
@@ -51,11 +89,11 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       };
 
-      setChats(prevChats => prevChats.map(chat => {
+      onUpdateChats(chats.map(chat => {
         if (chat.id === selectedChatId) {
           return {
             ...chat,
-            messages: [...chat.messages, landlordResponse]
+            messages: [...chat.messages, newMessage, landlordResponse] // Bao gồm cả tin mới nhất của tenant và bot
           };
         }
         return chat;
@@ -76,7 +114,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
       border: '1px solid var(--border)',
       boxShadow: 'var(--shadow-lg)'
     }}>
-      
+
       {/* LEFT COLUMN: LIST OF CHATS */}
       <div style={{ borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
         {/* Chat List Header */}
@@ -109,10 +147,10 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
                 className="hover-lift"
               >
                 <div style={{ position: 'relative' }}>
-                  <img 
-                    src={chat.landlord.avatar} 
-                    alt={chat.landlord.name} 
-                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                  <img
+                    src={chat.landlord.avatar}
+                    alt={chat.landlord.name}
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                   />
                   {chat.landlord.isOnline && (
                     <span style={{
@@ -156,7 +194,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
 
       {/* RIGHT COLUMN: ACTIVE CHAT PANEL */}
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        
+
         {/* Active Chat Header */}
         <div style={{
           padding: '12px 20px',
@@ -167,10 +205,10 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
           background: 'var(--bg-secondary)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img 
-              src={activeChat.landlord.avatar} 
-              alt={activeChat.landlord.name} 
-              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
+            <img
+              src={activeChat.landlord.avatar}
+              alt={activeChat.landlord.name}
+              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
             />
             <div>
               <h4 style={{ fontSize: '13px', fontWeight: 800 }}>{activeChat.landlord.name}</h4>
@@ -205,7 +243,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
           {activeChat.messages.map(msg => {
             const isMe = msg.sender === 'tenant';
             return (
-              <div 
+              <div
                 key={msg.id}
                 style={{
                   display: 'flex',
@@ -226,7 +264,7 @@ export default function Chat({ activeChatId, onBackToRooms, initialChats = mockC
                   }}>
                     {msg.text}
                   </div>
-                  
+
                   {/* Status Indicator */}
                   <div style={{
                     display: 'flex',
