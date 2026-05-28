@@ -188,6 +188,7 @@ class PropertyImportService:
                 "source_name": source_name,
                 "posted_at_text": safe_text(row.get("posted_at")),
                 "is_active": True,
+                "status": "approved",
             },
         )
 

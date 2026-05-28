@@ -127,6 +127,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
     ordering = ["-created_at"]
     cache_timeout = 60 * 5
 
+    def perform_create(self, serializer):
+        property_obj = serializer.save()
+        user = self.request.user
+        if user and user.is_authenticated:
+            PropertyManager.objects.create(property=property_obj, landlord=user)
+
     def get_queryset(self):
         queryset = (
             Property.objects.select_related("category", "district", "ward")

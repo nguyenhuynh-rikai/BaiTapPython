@@ -1,10 +1,52 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, X, Heart, MapPin, Share2, ShieldCheck, UserCheck, MessageSquare, Phone, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Heart, MapPin, Share2, ShieldCheck, UserCheck, MessageSquare, Phone, CheckCircle2, ShieldAlert, Calendar } from 'lucide-react';
+import { api } from '../utils/api';
 
-export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, onStartChat }) {
+export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, onStartChat, onNavigate }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const isFav = favorites ? favorites.includes(room.id) : false;
+
+  // Booking states
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingTime, setBookingTime] = useState('');
+  const [bookingNote, setBookingNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    if (!bookingDate || !bookingTime) {
+      alert('Vui lòng chọn đầy đủ ngày và giờ xem phòng!');
+      return;
+    }
+
+    const appointmentDateTime = `${bookingDate}T${bookingTime}:00`;
+    const chosenDate = new Date(appointmentDateTime);
+    if (chosenDate <= new Date()) {
+      alert('Thời gian hẹn xem phòng phải ở trong tương lai!');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await api.post('/appointments/', {
+        property: room.id,
+        appointment_date: chosenDate.toISOString(),
+        note: bookingNote || 'Muốn xem phòng trực tiếp.'
+      });
+      alert('Đặt lịch hẹn xem phòng thành công! Lịch hẹn của bạn đang chờ chủ phòng xác nhận.');
+      setBookingModalOpen(false);
+      setBookingDate('');
+      setBookingTime('');
+      setBookingNote('');
+      if (onNavigate) onNavigate('appointments');
+    } catch (err) {
+      alert(`Đặt lịch thất bại: ${err.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
@@ -570,13 +612,47 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                marginBottom: '10px'
               }}
               className="hover-lift"
             >
               <Phone size={16} />
               <span>Gọi chủ nhà ngay</span>
             </a>
+
+            <button 
+              onClick={() => {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                  alert('Vui lòng đăng nhập để đặt lịch hẹn xem phòng!');
+                  if (onNavigate) onNavigate('auth');
+                  return;
+                }
+                setBookingModalOpen(true);
+              }}
+              style={{
+                width: '100%',
+                background: 'var(--emerald)',
+                color: '#fff',
+                padding: '12px 0',
+                borderRadius: 'var(--radius-md)',
+                fontWeight: 700,
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)',
+                marginBottom: '10px',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              className="hover-lift"
+            >
+              <Calendar size={16} />
+              <span>Đặt lịch hẹn xem phòng</span>
+            </button>
 
             <div style={{
               display: 'flex',
@@ -625,6 +701,171 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
           </div>
         </div>
       </section>
+
+      {/* Booking Modal */}
+      {bookingModalOpen && (
+        <div 
+          onClick={() => setBookingModalOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(15, 23, 42, 0.6)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="glass-panel"
+            style={{
+              width: '450px',
+              maxWidth: '100%',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-premium)',
+              background: 'var(--bg-secondary)',
+              position: 'relative'
+            }}
+          >
+            {/* Close button */}
+            <button 
+              onClick={() => setBookingModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)' }}>
+              📅 Đặt Lịch Xem Phòng Trọ
+            </h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+              Điền thời gian bạn mong muốn xem phòng, chủ trọ sẽ duyệt và phản hồi lịch hẹn của bạn.
+            </p>
+
+            <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                    Chọn Ngày *
+                  </label>
+                  <input 
+                    type="date"
+                    required
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-primary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '10px',
+                      fontSize: '13px',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                    Chọn Giờ *
+                  </label>
+                  <input 
+                    type="time"
+                    required
+                    value={bookingTime}
+                    onChange={(e) => setBookingTime(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-primary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '10px',
+                      fontSize: '13px',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Ghi chú cho Chủ trọ
+                </label>
+                <textarea 
+                  rows={3}
+                  placeholder="Ví dụ: Tôi muốn xem phòng vào buổi chiều, khoảng sau 5h..."
+                  value={bookingNote}
+                  onChange={(e) => setBookingNote(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-primary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '10px',
+                    fontSize: '13px',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                    resize: 'none'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button 
+                  type="button"
+                  onClick={() => setBookingModalOpen(false)}
+                  style={{
+                    flex: 1,
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border)',
+                    padding: '10px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Hủy bỏ
+                </button>
+                <button 
+                  type="submit"
+                  disabled={submitting}
+                  style={{
+                    flex: 1,
+                    background: 'var(--primary)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    boxShadow: '0 4px 10px rgba(99, 102, 241, 0.2)',
+                    cursor: 'pointer',
+                    opacity: submitting ? 0.7 : 1
+                  }}
+                >
+                  {submitting ? 'Đang gửi...' : 'Xác nhận Đặt'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

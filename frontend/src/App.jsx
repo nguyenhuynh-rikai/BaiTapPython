@@ -7,6 +7,7 @@ import Chat from './pages/Chat';
 import LandlordDashboard from './pages/LandlordDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Auth from './pages/Auth';
+import Appointments from './pages/Appointments';
 import { api } from './utils/api';
 
 const ROOM_IMAGES = [
@@ -105,7 +106,7 @@ const mapBackendRoomToFrontend = (room) => {
       isVerified: true
     },
     description: room.description || 'Chưa có mô tả chi tiết.',
-    status: room.is_active ? 'approved' : 'pending'
+    status: room.status || (room.is_active ? 'approved' : 'pending')
   };
 };
 
@@ -230,7 +231,7 @@ function App() {
   // Approve listing from Admin
   const handleApproveRoom = async (roomId) => {
     try {
-      await api.patch(`/properties/${roomId}/`, { is_active: true });
+      await api.patch(`/properties/${roomId}/`, { is_active: true, status: 'approved' });
       fetchRooms();
       alert('Đã duyệt tin đăng thành công!');
     } catch (err) {
@@ -241,7 +242,7 @@ function App() {
   // Reject listing from Admin
   const handleRejectRoom = async (roomId, reason) => {
     try {
-      await api.patch(`/properties/${roomId}/`, { is_active: false });
+      await api.patch(`/properties/${roomId}/`, { is_active: false, status: 'rejected' });
       fetchRooms();
       alert(`Đã từ chối bài đăng với lý do: ${reason}`);
     } catch (err) {
@@ -359,6 +360,7 @@ function App() {
             favorites={favorites}
             onToggleFavorite={handleToggleFavorite}
             onStartChat={handleStartChat}
+            onNavigate={handleNavigate}
           />
         )}
 
@@ -424,6 +426,13 @@ function App() {
           />
         )}
 
+        {currentPage === 'appointments' && (
+          <Appointments 
+            onBackToRooms={() => setCurrentPage('home')} 
+            currentRole={currentRole}
+          />
+        )}
+
         {currentPage === 'auth' && (
           <Auth onLoginSuccess={handleLoginSuccess} />
         )}
@@ -436,6 +445,7 @@ function App() {
         onNavigate={handleNavigate}
         currentRole={currentRole}
         favoritesCount={favorites.length}
+        user={user}
       />
 
       {/* Footer view */}

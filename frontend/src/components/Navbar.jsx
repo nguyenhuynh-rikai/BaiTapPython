@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, MessageSquare, Shield, User, LogOut, Bell, Search, Layers } from 'lucide-react';
+import { Home, MessageSquare, Shield, User, LogOut, Bell, Search, Layers, Calendar } from 'lucide-react';
 
 export default function Navbar({ currentRole, onChangeRole, onNavigate, currentPage, user, onLogout }) {
   return (
@@ -68,6 +68,23 @@ export default function Navbar({ currentRole, onChangeRole, onNavigate, currentP
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
 
           {/* Quick Icons */}
+          {user && (
+            <button 
+              onClick={() => onNavigate('appointments')} 
+              style={{ 
+                position: 'relative', 
+                color: currentPage === 'appointments' ? 'var(--primary)' : 'var(--text-secondary)',
+                padding: '6px',
+                borderRadius: '50%',
+                transition: 'var(--transition)'
+              }}
+              className="hover-lift"
+              title="Lịch hẹn xem phòng"
+            >
+              <Calendar size={20} />
+            </button>
+          )}
+
           <button 
             onClick={() => onNavigate('chat')} 
             style={{ 

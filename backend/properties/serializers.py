@@ -73,6 +73,7 @@ class PropertySerializer(serializers.ModelSerializer):
             "posted_at_text",
             "images",
             "is_active",
+            "status",
             "created_at",
             "updated_at",
         ]

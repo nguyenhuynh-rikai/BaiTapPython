@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, Heart, MessageSquare, User, Shield } from 'lucide-react';
+import { Home, Heart, MessageSquare, User, Shield, Calendar } from 'lucide-react';
 
-export default function BottomBar({ currentPage, onNavigate, currentRole, favoritesCount }) {
+export default function BottomBar({ currentPage, onNavigate, currentRole, favoritesCount, user }) {
   return (
     <div className="glass-panel mobile-nav-bar" style={{
       position: 'fixed',
@@ -82,6 +82,26 @@ export default function BottomBar({ currentPage, onNavigate, currentRole, favori
         <MessageSquare size={20} />
         <span style={{ fontSize: '10px', fontWeight: 600 }}>Tin nhắn</span>
       </button>
+
+      {/* Tab Lịch hẹn */}
+      {user && (
+        <button 
+          onClick={() => onNavigate('appointments')} 
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            color: currentPage === 'appointments' ? 'var(--primary)' : 'var(--text-secondary)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <Calendar size={20} />
+          <span style={{ fontSize: '10px', fontWeight: 600 }}>Lịch hẹn</span>
+        </button>
+      )}
 
       {/* Tab Dashboard (Chủ nhà hoặc Admin) */}
       {currentRole === 'landlord' && (

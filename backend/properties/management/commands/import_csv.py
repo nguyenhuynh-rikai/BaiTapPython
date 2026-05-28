@@ -99,7 +99,8 @@ class Command(BaseCommand):
                             'category': category,
                             'source_name': row.get('source', 'NhaTot'),
                             'posted_at_text': str(row.get('posted_at', '')),
-                            'is_active': True
+                            'is_active': True,
+                            'status': 'approved'
                         }
                     )
                     count += 1
