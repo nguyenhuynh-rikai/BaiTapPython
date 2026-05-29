@@ -47,6 +47,7 @@ class PropertySerializer(serializers.ModelSerializer):
     ward_name = serializers.CharField(source="ward.name", read_only=True)
     amenities_detail = AmenitySerializer(source="amenities", many=True, read_only=True)
     images = PropertyImageSerializer(many=True, read_only=True)
+    landlord = serializers.SerializerMethodField()
 
     class Meta:  # type: ignore
         model = Property
@@ -76,7 +77,18 @@ class PropertySerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "updated_at",
+            "landlord",
         ]
+
+    def get_landlord(self, obj):
+        try:
+            return {
+                "username": obj.manager.landlord.username,
+                "email": obj.manager.landlord.email,
+            }
+        except Exception:
+            return None
+
 
 
 class ImportPropertiesSerializer(serializers.Serializer):

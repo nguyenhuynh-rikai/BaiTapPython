@@ -83,6 +83,15 @@ const mapBackendRoomToFrontend = (room) => {
   const rawArea = Number(room.area);
   const areaNum = !isNaN(rawArea) && rawArea > 0 ? rawArea : 25; // Mặc định 25m2 nếu lỗi
 
+  // Ánh xạ thông tin chủ nhà từ backend nếu có (bài đăng thật) hoặc trả về null (bài cào từ CSV)
+  const landlordObj = room.landlord ? {
+    name: room.landlord.username,
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    phone: '0987654321',
+    responseRate: '98%',
+    isVerified: true
+  } : null;
+
   return {
     id: room.id,
     title: room.title,
@@ -98,13 +107,9 @@ const mapBackendRoomToFrontend = (room) => {
     amenities: room.amenities_detail && room.amenities_detail.length > 0
       ? room.amenities_detail.map(a => a.name)
       : ['Wifi tốc độ cao', 'Chỗ để xe rộng', 'Giờ giấc tự do'],
-    landlord: {
-      name: 'Nguyễn Văn Hùng',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      phone: '0987654321',
-      responseRate: '98%',
-      isVerified: true
-    },
+    landlord: landlordObj,
+    sourceUrl: room.source_url || '',
+    sourceName: room.source_name || 'Nguồn ngoài',
     description: room.description || 'Chưa có mô tả chi tiết.',
     status: room.status || (room.is_active ? 'approved' : 'pending')
   };
@@ -319,8 +324,8 @@ function App() {
 
   // Filter approved rooms for Guest/Tenant view
   const approvedRooms = rooms.filter(r => r.status === 'approved');
-  // Landlord owns room ID 1, 2 and any newly created room
-  const landlordRooms = rooms.filter(r => r.id === 1 || r.id === 2 || r.id > 4);
+  // Lấy danh sách phòng thuộc sở hữu thực tế của chủ nhà đang đăng nhập
+  const landlordRooms = rooms.filter(r => r.landlord && r.landlord.name === user?.name);
 
   return (
     <div className="app-container" style={{ paddingBottom: '90px' }}>

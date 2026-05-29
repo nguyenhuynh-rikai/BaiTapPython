@@ -405,94 +405,112 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
           {/* Landlord Profile Profile card */}
           <section style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px' }}>Thông tin chủ nhà</h3>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'var(--bg-secondary)',
-              padding: '16px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ position: 'relative' }}>
-                  <img 
-                    src={room.landlord.avatar} 
-                    alt={room.landlord.name} 
-                    style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} 
-                  />
-                  {room.landlord.isVerified && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '-2px',
-                      right: '-2px',
-                      background: 'var(--emerald)',
-                      color: '#fff',
-                      borderRadius: '50%',
-                      width: '18px',
-                      height: '18px',
+            {room.landlord ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'var(--bg-secondary)',
+                padding: '16px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <img 
+                      src={room.landlord.avatar} 
+                      alt={room.landlord.name} 
+                      style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                    {room.landlord.isVerified && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-2px',
+                        right: '-2px',
+                        background: 'var(--emerald)',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        width: '18px',
+                        height: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid #fff'
+                      }}>
+                        <ShieldCheck size={12} />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>{room.landlord.name}</span>
+                      {room.landlord.isVerified && (
+                        <span style={{ fontSize: '10px', background: 'var(--emerald-light)', color: 'var(--emerald)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                          Đã xác minh
+                        </span>
+                      )}
+                    </h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tỷ lệ phản hồi nhanh: {room.landlord.responseRate}</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => onStartChat(room)}
+                    style={{
+                      background: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid #fff'
-                    }}>
-                      <ShieldCheck size={12} />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>{room.landlord.name}</span>
-                    {room.landlord.isVerified && (
-                      <span style={{ fontSize: '10px', background: 'var(--emerald-light)', color: 'var(--emerald)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                        Đã xác minh
-                      </span>
-                    )}
-                  </h4>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tỷ lệ phản hồi nhanh: {room.landlord.responseRate}</p>
+                      gap: '4px'
+                    }}
+                    className="hover-lift"
+                  >
+                    <MessageSquare size={13} />
+                    <span>Chat ngay</span>
+                  </button>
+                  <a 
+                    href={`tel:${room.landlord.phone}`}
+                    style={{
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-secondary)',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      border: '1px solid var(--border)'
+                    }}
+                    className="hover-lift"
+                  >
+                    <Phone size={13} />
+                    <span>Gọi điện</span>
+                  </a>
                 </div>
               </div>
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button 
-                  onClick={() => onStartChat(room)}
-                  style={{
-                    background: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                  className="hover-lift"
-                >
-                  <MessageSquare size={13} />
-                  <span>Chat ngay</span>
-                </button>
-                <a 
-                  href={`tel:${room.landlord.phone}`}
-                  style={{
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-secondary)',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    border: '1px solid var(--border)'
-                  }}
-                  className="hover-lift"
-                >
-                  <Phone size={13} />
-                  <span>Gọi điện</span>
-                </a>
+            ) : (
+              <div style={{
+                background: 'rgba(244, 63, 94, 0.03)',
+                padding: '16px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px dashed rgba(244, 63, 94, 0.25)',
+                color: 'var(--text-secondary)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <ShieldAlert size={18} style={{ color: 'var(--secondary)' }} />
+                  <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Nguồn tin cào tự động</strong>
+                </div>
+                <p style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                  Tin đăng này được thu thập tự động từ nguồn công cộng <strong>{room.sourceName}</strong> và chưa có tài khoản chủ trọ trực tiếp đăng ký quản lý trên hệ thống.
+                </p>
               </div>
-            </div>
+            )}
           </section>
 
           {/* Room Description */}
@@ -559,100 +577,145 @@ export default function RoomDetail({ room, onBack, favorites, onToggleFavorite, 
               </div>
             </div>
 
-            {/* Predefined starter chat suggestion */}
-            <div style={{
-              fontSize: '11px',
-              color: 'var(--text-muted)',
-              marginBottom: '16px',
-              padding: '8px 12px',
-              background: 'var(--primary-light)',
-              borderRadius: '8px',
-              border: '1px dashed var(--primary)',
-              color: 'var(--primary)',
-              fontWeight: 600
-            }}>
-              💬 Soạn sẵn tin nhắn mồi để trao đổi trực tuyến nhanh chóng với chủ nhà!
-            </div>
+            {room.landlord ? (
+              <>
+                {/* Predefined starter chat suggestion */}
+                <div style={{
+                  fontSize: '11px',
+                  color: 'var(--text-muted)',
+                  marginBottom: '16px',
+                  padding: '8px 12px',
+                  background: 'var(--primary-light)',
+                  borderRadius: '8px',
+                  border: '1px dashed var(--primary)',
+                  color: 'var(--primary)',
+                  fontWeight: 600
+                }}>
+                  💬 Soạn sẵn tin nhắn mồi để trao đổi trực tuyến nhanh chóng với chủ nhà!
+                </div>
 
-            {/* CTA action buttons */}
-            <button 
-              onClick={() => onStartChat(room)}
-              style={{
-                width: '100%',
-                background: 'var(--primary)',
-                color: '#fff',
-                padding: '12px 0',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 700,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 10px rgba(99, 102, 241, 0.3)',
-                marginBottom: '10px'
-              }}
-              className="hover-lift"
-            >
-              <MessageSquare size={16} />
-              <span>Gửi tin nhắn thương lượng</span>
-            </button>
-            
-            <a 
-              href={`tel:${room.landlord.phone}`}
-              style={{
-                width: '100%',
-                background: 'transparent',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border)',
-                padding: '11px 0',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 700,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '10px'
-              }}
-              className="hover-lift"
-            >
-              <Phone size={16} />
-              <span>Gọi chủ nhà ngay</span>
-            </a>
+                {/* CTA action buttons */}
+                <button 
+                  onClick={() => onStartChat(room)}
+                  style={{
+                    width: '100%',
+                    background: 'var(--primary)',
+                    color: '#fff',
+                    padding: '12px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 10px rgba(99, 102, 241, 0.3)',
+                    marginBottom: '10px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  className="hover-lift"
+                >
+                  <MessageSquare size={16} />
+                  <span>Gửi tin nhắn thương lượng</span>
+                </button>
+                
+                <a 
+                  href={`tel:${room.landlord.phone}`}
+                  style={{
+                    width: '100%',
+                    background: 'transparent',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
+                    padding: '11px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginBottom: '10px',
+                    textDecoration: 'none'
+                  }}
+                  className="hover-lift"
+                >
+                  <Phone size={16} />
+                  <span>Gọi chủ nhà ngay</span>
+                </a>
 
-            <button 
-              onClick={() => {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                  alert('Vui lòng đăng nhập để đặt lịch hẹn xem phòng!');
-                  if (onNavigate) onNavigate('auth');
-                  return;
-                }
-                setBookingModalOpen(true);
-              }}
-              style={{
-                width: '100%',
-                background: 'var(--emerald)',
-                color: '#fff',
-                padding: '12px 0',
+                <button 
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                      alert('Vui lòng đăng nhập để đặt lịch hẹn xem phòng!');
+                      if (onNavigate) onNavigate('auth');
+                      return;
+                    }
+                    setBookingModalOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    background: 'var(--emerald)',
+                    color: '#fff',
+                    padding: '12px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)',
+                    marginBottom: '10px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  className="hover-lift"
+                >
+                  <Calendar size={16} />
+                  <span>Đặt lịch hẹn xem phòng</span>
+                </button>
+              </>
+            ) : (
+              <div style={{
+                background: 'rgba(99, 102, 241, 0.04)',
+                border: '1px dashed var(--primary)',
                 borderRadius: 'var(--radius-md)',
-                fontWeight: 700,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)',
-                marginBottom: '10px',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              className="hover-lift"
-            >
-              <Calendar size={16} />
-              <span>Đặt lịch hẹn xem phòng</span>
-            </button>
+                padding: '16px',
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '14px' }}>
+                  💡 Đây là tin đăng được đồng bộ tự động từ trang web <strong>{room.sourceName}</strong>. 
+                  Vui lòng bấm nút dưới đây để xem bài đăng gốc và liên hệ trực tiếp chủ tin.
+                </p>
+                
+                <a 
+                  href={room.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    width: '100%',
+                    background: 'var(--primary)',
+                    color: '#fff',
+                    padding: '12px 0',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 10px rgba(99, 102, 241, 0.3)',
+                    textDecoration: 'none'
+                  }}
+                  className="hover-lift"
+                >
+                  <span>Xem tin gốc tại {room.sourceName} 🌐</span>
+                </a>
+              </div>
+            )}
 
             <div style={{
               display: 'flex',
