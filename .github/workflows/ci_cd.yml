@@ -1,0 +1,76 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "nguyen_day14", "main", "master" ]
+  pull_request:
+    branches: [ "nguyen_day14", "main", "master" ]
+
+jobs:
+  # === BƯỚC 1: CONTINUOUS INTEGRATION (KIỂM THỬ TỰ ĐỘNG) ===
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    # Thiết lập các dịch vụ chạy kèm máy ảo (Database)
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: housing_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: No12345678
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # Thiết lập biến môi trường ảo cho quá trình test
+    env:
+      DJANGO_ENV: development
+      DJANGO_SECRET_KEY: test-secret-key-123
+      DB_NAME: housing_db
+      DB_USER: postgres
+      DB_PASSWORD: No12345678
+      DB_HOST: localhost
+      DB_PORT: 5432
+      
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip' # Tự động cache các thư viện để chạy nhanh hơn ở lần sau
+        cache-dependency-path: 'backend/requirements.txt'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Tests with Coverage
+      run: |
+        coverage run manage.py test properties
+        coverage report -m
+
+  # === BƯỚC 2: CONTINUOUS DEPLOYMENT (TRIỂN KHAI LÊN RENDER) ===
+  deploy:
+    name: Deploy to Render
+    needs: test # Bắt buộc phải pass qua bước "test" ở trên mới được deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/nguyen_day14' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Trigger Render Deploy Hook
+      run: |
+        curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
